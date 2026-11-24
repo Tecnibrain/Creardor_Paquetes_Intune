@@ -1,4 +1,4 @@
-﻿# Fábrica de Paquetes PSADT para Intune (v2)
+﻿# Fábrica de Paquetes PSADT para Intune (v4.0)
 
 Crea paquetes de **PSAppDeployToolkit 4.x** listos para **Intune** a partir de un **MSI, EXE o script PS1**, sin escribir código.
 
@@ -13,12 +13,34 @@ Crea paquetes de **PSAppDeployToolkit 4.x** listos para **Intune** a partir de u
 
 **Dónde queda el paquete:** en el panel derecho, *Dónde queda el paquete listo* → **Cambiar carpeta...** (puede ser una carpeta de red, por ejemplo `\\servidor\Paquetes\Intune`). La herramienta recuerda la carpeta. Ahí se crea `<Paquete>\` con el `.intunewin`, la ficha, la detección, la descripción y el logo. Si marcas *Incluir también la carpeta fuente*, se copia además la carpeta editable del paquete en `<Paquete>\Fuente`.
 
-La interfaz tiene tres secciones en el menú de la izquierda:
+La interfaz tiene cuatro secciones en el menú de la izquierda:
 - **Crear paquete:** el día a día.
+- **Paquetes creados:** lista de todo lo que se ha creado con la Fábrica (fecha, quién, si tiene `.intunewin`), con botones para abrir la salida o la carpeta fuente. Tiene buscador.
 - **Plantilla corporativa:** empresa, color, logo, idioma y valores por defecto.
 - **Cómo funciona:** guía rápida dentro de la herramienta.
 
+Ayudas mientras llenas el formulario:
+- Los campos obligatorios que faltan se marcan **en rojo** (y en naranja los avisos, por ejemplo un EXE sin argumentos silenciosos).
+- Encima del botón **Crear paquete** hay un resumen: qué falta o «Todo listo».
+- En el menú de la izquierda, **Tu avance** marca con ✔ cada paso completo.
+- Atajos: **Ctrl+O** elegir instalador, **Ctrl+Enter** crear paquete, **F5** ver ventanas reales.
+
 Abajo, la barra de estado muestra lo que está pasando. Haz clic en ella para ver el registro completo.
+
+## Versión web
+
+La misma Fábrica, en el navegador. Ábrela con **`Crear-Paquete-Web.cmd`** o con el botón **🌐 Abrir versión web** del menú.
+
+- Se abre Edge en una ventana propia. La ventana negra (consola) **es la Fábrica**: no la cierres mientras uses la página. Para terminar, pulsa **Cerrar Fábrica** en la página (o Ctrl+C en la consola).
+- **Solo funciona en este equipo:** escucha en `127.0.0.1` (no acepta conexiones de otros equipos) y usa un código secreto que cambia cada vez que se abre. No necesita IIS, permisos de administrador ni Internet.
+- Tiene lo mismo que la de escritorio: crear paquete, vista previa, ver ventanas reales, paquetes creados y plantilla corporativa. Además tiene tema oscuro (botón **◐ Tema**).
+- **El instalador**, de tres formas:
+  - **Clic en la zona punteada:** abre el buscador de archivos de Windows (puede quedar detrás del navegador: búscalo en la barra de tareas).
+  - **Pegar la ruta** completa, por ejemplo `D:\Fuentes\MiApp\setup.msi`, y pulsar **Leer**.
+  - **Arrastrar el archivo:** el navegador no entrega la ruta, así que **solo se copia ese archivo**. Si el instalador trae archivos adicionales o es un `.ps1` con su script de desinstalación, usa el clic o la ruta.
+- Mientras se crea el paquete la página muestra «Creando el paquete…»; el detalle en vivo se ve en la consola.
+
+Si Edge no está instalado, se abre el navegador por defecto. Para usar un puerto fijo: `Nuevo-Paquete.ps1 -ModoWeb -Puerto 8765`.
 
 Listo. En `Salida\<Paquete>\` quedan:
 
@@ -119,11 +141,12 @@ Invoke-AppDeployToolkit.exe -DeploymentType Uninstall
 
 ```
 FabricaPaquetes\
-├── Crear-Paquete.cmd      ← doble clic
+├── Crear-Paquete.cmd      ← doble clic (escritorio)
+├── Crear-Paquete-Web.cmd  ← doble clic (versión web)
 ├── Nuevo-Paquete.ps1      ← la herramienta
 ├── LEEME.md
 ├── Herramientas\          ← IntuneWinAppUtil.exe (+ módulo PSADT)
-├── Recursos\              ← plantilla corporativa (se crea sola)
+├── Recursos\              ← plantilla corporativa (se crea sola) e Historial.json
 ├── Paquetes\              ← un folder por paquete
 └── Salida\                ← lo que se sube a Intune
 ```
@@ -137,6 +160,7 @@ FabricaPaquetes\
 
 ## Seguridad
 
+- La versión web escucha solo en `127.0.0.1`, valida las cabeceras `Host` y `Origin` y exige un código aleatorio por sesión en cada petición. Desde la página solo se pueden abrir en el Explorador las carpetas de la Fábrica y de sus paquetes. Los archivos arrastrados se guardan en `%TEMP%\FabricaWeb_*` y se borran al cerrar la Fábrica.
 - `Crear-Paquete.cmd` usa `-ExecutionPolicy Bypass` solo en el equipo de empaquetamiento. Si la política lo exige, firma los scripts con el certificado interno.
 - El módulo PSADT valida su propia firma digital: usa solo la versión oficial (PowerShell Gallery o GitHub de PSAppDeployToolkit).
 - No pongas contraseñas ni tokens en los argumentos: quedan en los logs y en la caché de Intune.

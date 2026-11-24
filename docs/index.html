@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fábrica de Paquetes PSADT</title>
+<meta name="description" content="Crea paquetes de PSAppDeployToolkit 4.x listos para Intune a partir de un MSI, EXE o PS1, sin escribir código.">
+<style>
+:root{
+  --acento:#0F4C81; --acento-texto:#fff; --acento-suave:rgba(15,76,129,.08);
+  --fondo:#F4F6F9; --tarjeta:#fff; --borde:#E4E7EC; --texto:#101828; --texto2:#344054; --texto3:#667085;
+  --aviso:#B54708; --aviso-fondo:#FFFAEB; --codigo:#F2F4F7;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --acento:#5B9BD5; --acento-texto:#0B1220; --acento-suave:rgba(91,155,213,.12);
+    --fondo:#0F1115; --tarjeta:#181B21; --borde:#2A2F38; --texto:#F2F4F7; --texto2:#D0D5DD; --texto3:#98A2B3;
+    --aviso:#FEC84B; --aviso-fondo:#2B2111; --codigo:#1F232A;
+  }
+}
+:root[data-theme="dark"]{
+  --acento:#5B9BD5; --acento-texto:#0B1220; --acento-suave:rgba(91,155,213,.12);
+  --fondo:#0F1115; --tarjeta:#181B21; --borde:#2A2F38; --texto:#F2F4F7; --texto2:#D0D5DD; --texto3:#98A2B3;
+  --aviso:#FEC84B; --aviso-fondo:#2B2111; --codigo:#1F232A;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--texto);font:16px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif}
+a{color:var(--acento)}
+.ancho{max-width:1040px;margin:0 auto;padding:0 16px}
+header.top{border-bottom:1px solid var(--borde);background:var(--tarjeta)}
+header.top .ancho{display:flex;align-items:center;gap:12px;height:60px}
+.marca{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--texto);text-decoration:none}
+.marca i{width:30px;height:30px;border-radius:7px;background:var(--acento);color:var(--acento-texto);display:grid;place-items:center;font-style:normal;font-size:16px}
+header.top nav{margin-left:auto;display:flex;gap:18px;font-size:14px}
+header.top nav a{color:var(--texto2);text-decoration:none}
+header.top nav a:hover{color:var(--acento)}
+.hero{padding:56px 0 40px}
+.hero h1{font-size:clamp(30px,5vw,46px);line-height:1.12;margin:0 0 14px;letter-spacing:-.02em}
+.hero p.lead{font-size:clamp(17px,2.2vw,20px);color:var(--texto2);max-width:680px;margin:0 0 26px}
+.botones{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid var(--borde);color:var(--texto2);background:var(--tarjeta)}
+.btn:hover{border-color:var(--acento)}
+.btn.primario{background:var(--acento);color:var(--acento-texto);border-color:transparent}
+.btn.primario:hover{filter:brightness(1.08)}
+.nota{background:var(--aviso-fondo);color:var(--aviso);border-radius:10px;padding:10px 14px;font-size:14px;margin-top:22px;max-width:680px}
+.captura{margin:8px 0 48px;border-radius:12px;overflow:hidden;border:1px solid var(--borde);box-shadow:0 20px 40px rgba(16,24,40,.12)}
+.captura img{display:block;width:100%;height:auto}
+section{padding:12px 0 36px}
+h2{font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--texto3);margin:0 0 20px}
+.rejilla{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.tarjeta{background:var(--tarjeta);border:1px solid var(--borde);border-radius:12px;padding:18px 20px}
+.tarjeta h3{margin:0 0 6px;font-size:17px}
+.tarjeta p{margin:0;color:var(--texto2);font-size:15px}
+.paso{display:flex;gap:14px}
+.paso b.n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--acento);color:var(--acento-texto);display:grid;place-items:center;font-size:15px}
+code{background:var(--codigo);border-radius:5px;padding:1px 6px;font:14px Consolas,monospace}
+table{width:100%;border-collapse:collapse;background:var(--tarjeta);border:1px solid var(--borde);border-radius:12px;overflow:hidden;font-size:15px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--borde);vertical-align:top}
+th{background:var(--acento-suave);font-weight:600}
+tr:last-child td{border-bottom:0}
+.tabla{overflow-x:auto}
+ul.lista{margin:0;padding-left:20px;color:var(--texto2)}
+ul.lista li{margin:4px 0}
+footer{border-top:1px solid var(--borde);color:var(--texto3);font-size:13px;padding:22px 0 34px}
+@media (max-width:640px){header.top nav{display:none}.hero{padding:36px 0 28px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="ancho">
+  <a class="marca" href="./"><i>📦</i>Fábrica de Paquetes</a>
+  <nav><a href="#como">Cómo se usa</a><a href="#genera">Qué genera</a><a href="#requisitos">Requisitos</a><a href="demo.html">Demostración</a><a href="https://github.com/Tecnibrain/Creardor_Paquetes_Intune">GitHub</a></nav>
+</div></header>
+
+<main class="ancho">
+  <div class="hero">
+    <h1>Paquetes de PSADT para Intune,<br>sin escribir código</h1>
+    <p class="lead">Arrastra un instalador <b>MSI</b>, <b>EXE</b> o un script <b>PS1</b>. La Fábrica arma el paquete de PSAppDeployToolkit 4.x, el <code>.intunewin</code>, la detección y la ficha con todo lo que hay que configurar en Intune.</p>
+    <div class="botones" id="descargar">
+      <a class="btn primario" href="https://github.com/Tecnibrain/Creardor_Paquetes_Intune/archive/refs/heads/main.zip">⬇ Descargar la Fábrica (ZIP)</a>
+      <a class="btn" href="demo.html">▶ Probar la demostración</a>
+      <a class="btn" href="https://github.com/Tecnibrain/Creardor_Paquetes_Intune">Ver el código</a>
+    </div>
+    <div class="nota">La Fábrica <b>se ejecuta en tu equipo con Windows</b>. Esta página solo sirve para descargarla y conocerla: la demostración usa datos de ejemplo y no crea paquetes.</div>
+  </div>
+
+  <div class="captura"><img src="img/vista-web.png" alt="Pantalla de la Fábrica de Paquetes: tarjetas para el instalador y la información de la app, y a la derecha la vista previa de la ventana que verá el usuario." width="1400" height="900"></div>
+
+  <section id="como">
+    <h2>Cómo se usa</h2>
+    <p class="sub">Tres pasos. No hay que instalar nada.</p>
+    <div class="rejilla">
+      <div class="tarjeta paso"><b class="n">1</b><div><h3>Descarga</h3><p>Baja el ZIP y descomprímelo, por ejemplo en <code>D:\FabricaPaquetes</code>.</p></div></div>
+      <div class="tarjeta paso"><b class="n">2</b><div><h3>Abre</h3><p>Doble clic en <code>Crear-Paquete-Web.cmd</code> (en el navegador) o <code>Crear-Paquete.cmd</code> (ventana de escritorio).</p></div></div>
+      <div class="tarjeta paso"><b class="n">3</b><div><h3>Crea</h3><p>Arrastra el instalador, revisa los datos, mira la vista previa y pulsa <b>Crear paquete</b>.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Lo que hace por ti</h2>
+    <p class="sub">Basada en las funciones oficiales de PSAppDeployToolkit 4.1 / 4.2.</p>
+    <div class="rejilla">
+      <div class="tarjeta"><h3>Lee el instalador</h3><p>Nombre, versión, fabricante y código de producto del MSI; versión e ícono del EXE; script de desinstalación del PS1.</p></div>
+      <div class="tarjeta"><h3>Ventanas para el usuario</h3><p>Apps que se deben cerrar, aplazamientos, fecha límite, cuenta regresiva y textos propios, con vista previa en vivo.</p></div>
+      <div class="tarjeta"><h3>Plantilla corporativa</h3><p>Nombre de la empresa, color, logo, banner, idioma y ruta de logs para todos los paquetes.</p></div>
+      <div class="tarjeta"><h3>Validación y historial</h3><p>Marca en rojo lo que falta antes de crear, y guarda la lista de paquetes creados.</p></div>
+    </div>
+  </section>
+
+  <section id="genera">
+    <h2>Qué genera</h2>
+    <p class="sub">En la carpeta de salida de cada paquete:</p>
+    <div class="tabla"><table>
+      <tr><th>Archivo</th><th>Para qué</th></tr>
+      <tr><td><code>&lt;Paquete&gt;.intunewin</code></td><td>Se sube a Intune como aplicación Win32.</td></tr>
+      <tr><td><code>FichaIntune.txt</code></td><td>Comandos de instalación y desinstalación, códigos de retorno, detección, requisitos y pruebas.</td></tr>
+      <tr><td><code>Deteccion.ps1</code></td><td>Regla de detección: código de producto (MSI), nombre y versión (EXE) o marca de registro (PS1).</td></tr>
+      <tr><td><code>Descripcion.txt</code></td><td>Descripción para Company Portal.</td></tr>
+      <tr><td><code>Logo_Intune.png</code></td><td>Ícono de la app (512 px).</td></tr>
+    </table></div>
+  </section>
+
+  <section id="requisitos">
+    <h2>Requisitos</h2>
+    <div class="rejilla">
+      <div class="tarjeta"><h3>Equipo</h3><ul class="lista"><li>Windows 10 u 11 con Windows PowerShell 5.1.</li><li>No necesita permisos de administrador para crear paquetes.</li><li>La versión web abre Edge; si no está, el navegador por defecto.</li></ul></div>
+      <div class="tarjeta"><h3>Incluido</h3><ul class="lista"><li><code>IntuneWinAppUtil.exe</code> oficial de Microsoft, con su licencia.</li><li>El módulo PSAppDeployToolkit se busca en <code>Herramientas</code>, en el equipo o en la PowerShell Gallery.</li></ul></div>
+      <div class="tarjeta"><h3>Seguridad</h3><ul class="lista"><li>La versión web solo escucha en <code>127.0.0.1</code>, con un código nuevo cada vez que se abre.</li><li>Prueba cada paquete como SYSTEM antes de publicarlo (la ficha trae los pasos).</li></ul></div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="ancho">
+  Fábrica de Paquetes v4.0 · Usa <a href="https://psappdeploytoolkit.com/">PSAppDeployToolkit</a> 4.x. <code>IntuneWinAppUtil.exe</code> es de Microsoft y está sujeto a sus términos de licencia (PDF incluido en <code>Herramientas</code>).
+</div></footer>
+</body>
+</html>

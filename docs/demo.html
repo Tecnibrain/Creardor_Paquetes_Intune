@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fábrica de Paquetes · Demostración</title>
+<meta name="robots" content="noindex">
+<style>
+:root{
+  --acento:#2C2A29; --acento-texto:#fff; --acento-suave:rgba(44,42,41,.09);
+  --fondo:#F4F6F9; --tarjeta:#fff; --borde:#E4E7EC; --borde-campo:#D0D5DD;
+  --texto:#101828; --texto2:#344054; --texto3:#667085; --texto4:#98A2B3; --campo:#fff; --campo-ro:#F2F4F7;
+  --ok:#027A48; --ok-fondo:#ECFDF3; --aviso:#B54708; --aviso-fondo:#FFFAEB; --error:#B42318; --error-fondo:#FEF3F2;
+  --sombra:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --fondo:#0F1115; --tarjeta:#181B21; --borde:#2A2F38; --borde-campo:#3A404B;
+    --texto:#F2F4F7; --texto2:#D0D5DD; --texto3:#98A2B3; --texto4:#667085; --campo:#111318; --campo-ro:#1F232A;
+    --ok:#6CE9A6; --ok-fondo:#0B2A1C; --aviso:#FEC84B; --aviso-fondo:#2B2111; --error:#FDA29B; --error-fondo:#2D1414;
+    --sombra:0 1px 3px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --fondo:#0F1115; --tarjeta:#181B21; --borde:#2A2F38; --borde-campo:#3A404B;
+  --texto:#F2F4F7; --texto2:#D0D5DD; --texto3:#98A2B3; --texto4:#667085; --campo:#111318; --campo-ro:#1F232A;
+  --ok:#6CE9A6; --ok-fondo:#0B2A1C; --aviso:#FEC84B; --aviso-fondo:#2B2111; --error:#FDA29B; --error-fondo:#2D1414;
+  --sombra:0 1px 3px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--fondo);color:var(--texto);font:14px/1.45 "Segoe UI",system-ui,-apple-system,sans-serif;display:flex;flex-direction:column}
+button,input,select,textarea{font:inherit;color:inherit}
+header{background:var(--acento);color:var(--acento-texto);padding:12px 22px;display:flex;align-items:center;gap:14px;flex:none}
+header .logo{width:40px;height:40px;border-radius:8px;background:#fff;display:grid;place-items:center;overflow:hidden;flex:none}
+header .logo img{max-width:32px;max-height:32px}
+header h1{font-size:19px;font-weight:600;margin:0;line-height:1.2}
+header .sub{font-size:12px;opacity:.85}
+header .der{margin-left:auto;display:flex;gap:8px;align-items:center}
+.pastilla{background:rgba(255,255,255,.2);border-radius:12px;padding:4px 12px;font-size:12px;white-space:nowrap}
+.btn-cab{white-space:nowrap;background:rgba(255,255,255,.18);border:0;color:inherit;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12.5px}
+.btn-cab:hover{background:rgba(255,255,255,.3)}
+.cuerpo{flex:1;display:flex;min-height:0}
+nav{width:216px;flex:none;background:var(--tarjeta);border-right:1px solid var(--borde);padding:16px 12px;overflow:auto}
+nav .item{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:transparent;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--texto2);margin-bottom:4px;font-size:14px}
+nav .item:hover{background:var(--acento-suave)}
+nav .item.activo{background:var(--acento-suave);font-weight:600;color:var(--texto)}
+nav hr{border:0;border-top:1px solid var(--borde);margin:14px 0}
+.titulo-nav{font-size:11px;font-weight:600;color:var(--texto4);margin:0 6px 6px;letter-spacing:.04em}
+.paso{font-size:12.5px;color:var(--texto4);padding:3px 6px}
+.paso.ok{color:var(--ok);font-weight:600}
+.atajos{font-size:11.5px;color:var(--texto3);margin:12px 6px 0;white-space:pre-line}
+main{flex:1;overflow:auto;padding:16px 18px 8px;min-width:0}
+.pagina{display:none}
+.pagina.activa{display:block}
+.dos{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:18px;align-items:start}
+.panel-der{position:sticky;top:0;max-height:calc(100vh - 140px);overflow:auto;padding-right:4px}
+.tarjeta{background:var(--tarjeta);border:1px solid var(--borde);border-radius:10px;padding:16px 20px;margin-bottom:14px;box-shadow:var(--sombra)}
+.tarjeta h2{font-size:15px;font-weight:600;margin:0 0 2px}
+.tarjeta .subt{font-size:12px;color:var(--texto3);margin:0 0 12px}
+label.et{display:block;font-weight:600;color:var(--texto2);margin:10px 0 4px}
+.ayuda{font-size:11.5px;color:var(--texto3);margin-top:3px}
+.msg{font-size:11.5px;margin-top:4px;display:none}
+.msg.error{display:block;color:var(--error)}
+.msg.aviso{display:block;color:var(--aviso)}
+input[type=text],textarea,select{width:100%;background:var(--campo);border:1px solid var(--borde-campo);border-radius:6px;padding:7px 9px;outline:none}
+textarea{resize:vertical;min-height:56px}
+input[type=text]:focus,textarea:focus,select:focus{border-color:var(--acento);box-shadow:0 0 0 3px var(--acento-suave)}
+input.error,textarea.error{border-color:#D92D20;border-width:1.5px}
+input.aviso,textarea.aviso{border-color:#F79009;border-width:1.5px}
+input[readonly]{background:var(--campo-ro)}
+.fila{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.fila.mitad{grid-template-columns:1fr 1fr}
+.con-boton{display:flex;gap:8px}
+.chk{display:flex;gap:8px;align-items:flex-start;margin-top:10px;color:var(--texto2);cursor:pointer}
+.chk input{margin-top:3px;accent-color:var(--acento)}
+.chk.deshabilitado{opacity:.5;cursor:default}
+.btn{border:1px solid var(--borde-campo);background:var(--tarjeta);color:var(--texto2);font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--campo-ro)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primario{background:var(--acento);color:var(--acento-texto);border-color:transparent;font-size:15px;padding:11px 18px;width:100%}
+.btn.primario:hover{filter:brightness(1.08)}
+.btn.ancho{width:100%}
+.zona{border:1.5px dashed var(--acento);background:var(--acento-suave);border-radius:10px;padding:18px;text-align:center;cursor:pointer;min-height:96px;display:flex;flex-direction:column;justify-content:center;transition:background .15s}
+.zona.encima{background:var(--acento);color:var(--acento-texto)}
+.zona .ico{font-size:26px;line-height:1}
+.zona .t1{font-weight:600;font-size:14px}
+.zona .t2{font-size:12px;color:var(--texto3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zona.encima .t2{color:inherit}
+.chip{display:inline-block;background:var(--campo-ro);border-radius:10px;padding:2px 10px;font-weight:600;font-size:12px;color:var(--texto2)}
+.logo-caja{width:60px;height:60px;border-radius:10px;border:1px solid var(--borde);background:var(--campo-ro);display:grid;place-items:center;overflow:hidden;flex:none;font-weight:700;font-size:20px;color:var(--texto4)}
+.logo-caja img{max-width:48px;max-height:48px}
+.deslizadores{display:grid;grid-template-columns:190px 1fr 100px;gap:6px 12px;align-items:center;margin-top:14px}
+.deslizadores span.et2{font-weight:600;color:var(--texto2)}
+.deslizadores b{font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acento)}
+.oculto{display:none!important}
+/* Maqueta de la ventana de PSADT */
+.maqueta{background:#fff;color:#101828;border:1px solid #D0D5DD;border-radius:8px;display:grid;grid-template-columns:6px 1fr;box-shadow:0 6px 18px rgba(0,0,0,.18);overflow:hidden}
+.maqueta .franja{background:var(--acento)}
+.maqueta .dentro{padding:14px}
+.maqueta .cab{display:flex;gap:10px;align-items:center}
+.maqueta .ini{width:38px;height:38px;border-radius:8px;background:var(--acento);color:var(--acento-texto);display:grid;place-items:center;font-weight:700;overflow:hidden;flex:none}
+.maqueta .ini img{width:38px;height:38px;object-fit:contain;background:#fff}
+.maqueta .tit{font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.maqueta .st{font-size:11px;color:#667085}
+.maqueta .caja{border:1px solid #E4E7EC;border-radius:6px;margin-top:12px;padding:10px;font-size:11.5px;color:#344054}
+.maqueta .lista{border:1px solid #E4E7EC;border-radius:6px;margin-top:10px;padding:4px 8px}
+.maqueta .proc{display:flex;gap:8px;align-items:center;margin:4px 0}
+.maqueta .proc i{width:22px;height:22px;border-radius:4px;background:var(--acento-suave);display:grid;place-items:center;font-style:normal;font-weight:700;font-size:11px}
+.maqueta .proc b{display:block;font-size:11.5px}
+.maqueta .proc small{font-size:10px;color:var(--acento)}
+.maqueta .fila-m{display:flex;justify-content:space-between;font-size:11.5px;color:#667085;margin-top:6px}
+.maqueta .fila-m b{color:#101828}
+.maqueta .fila-m b.res{color:#B8860B}
+.maqueta .botones{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.maqueta .botones div{border-radius:4px;padding:6px;text-align:center;font-size:11.5px}
+.maqueta .bi{border:1px solid #D0D5DD;color:#344054}
+.maqueta .ba{background:var(--acento);color:var(--acento-texto)}
+.maqueta .acento,.maqueta .url{color:var(--acento)}
+.maqueta .url{text-decoration:underline}
+.nota{border-radius:8px;padding:9px 12px;font-size:12px;margin-top:12px}
+.nota.naranja{background:var(--aviso-fondo);color:var(--aviso)}
+.nota.gris{background:var(--campo-ro);color:var(--texto2)}
+.nota.verde{background:var(--ok-fondo);color:var(--ok)}
+.nota.roja{background:var(--error-fondo);color:var(--error)}
+.caja-destino{background:var(--tarjeta);border:1px solid var(--borde);border-radius:8px;padding:10px 12px;margin:14px 0 10px}
+.caja-destino .ruta{font-size:11.5px;color:var(--texto3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:4px 0 8px}
+.dos-botones{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+/* Paquetes */
+.barra-pag{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.barra-pag h2{font-size:18px;margin:0}
+.barra-pag .espacio{flex:1}
+.barra-pag input{width:260px}
+.paquete{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:14px;align-items:center}
+.paquete .tipo{width:44px;height:44px;border-radius:8px;background:var(--acento-suave);display:grid;place-items:center;font-weight:700;font-size:11px}
+.paquete .n{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.paquete .d{font-size:11.5px;color:var(--texto3)}
+.paquete .c{font-size:11px;color:var(--texto4);font-family:Consolas,monospace}
+.paquete .acc{display:flex;gap:8px}
+/* Plantilla */
+.colores{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.colores input[type=color]{width:38px;height:34px;padding:0;border:1px solid var(--borde-campo);border-radius:6px;background:none}
+.colores input[type=text]{width:110px}
+.muestra{width:24px;height:24px;border-radius:5px;border:1px solid var(--borde-campo);cursor:pointer}
+.banner-caja{border:1px solid var(--borde);background:var(--campo-ro);border-radius:6px;padding:4px;display:inline-block;min-width:200px;min-height:58px}
+.banner-caja img{max-width:360px;max-height:50px;display:block}
+.prev-icono{width:110px;height:110px;border-radius:10px;border:1px solid var(--borde);background:var(--campo-ro);display:grid;place-items:center}
+.prev-icono img{max-width:94px;max-height:94px}
+.ayuda-pag p{margin:4px 0;color:var(--texto2)}
+/* Barra inferior */
+footer{flex:none;background:var(--tarjeta);border-top:1px solid var(--borde);padding:8px 18px 8px 234px}
+footer .estado{cursor:pointer;color:var(--texto3);display:flex;gap:8px;align-items:center;user-select:none}
+footer .estado .flecha{font-size:10px;transition:transform .15s}
+footer.abierto .estado .flecha{transform:rotate(90deg)}
+footer pre{display:none;height:150px;overflow:auto;margin:8px 0 0;background:var(--campo);border:1px solid var(--borde-campo);border-radius:6px;padding:8px;font:11.5px/1.5 Consolas,monospace;white-space:pre}
+footer.abierto pre{display:block}
+.l-OK{color:var(--ok)} .l-Aviso{color:var(--aviso)} .l-Error{color:var(--error)}
+/* Capa de espera y diálogo */
+.capa{position:fixed;inset:0;background:rgba(16,24,40,.45);display:none;align-items:center;justify-content:center;z-index:10;padding:16px}
+.capa.visible{display:flex}
+.dialogo{background:var(--tarjeta);border-radius:12px;padding:22px 24px;max-width:520px;width:100%;box-shadow:0 20px 40px rgba(0,0,0,.3)}
+.dialogo h3{margin:0 0 8px;font-size:17px}
+.dialogo .txt{white-space:pre-line;color:var(--texto2);font-size:13.5px;word-break:break-word}
+.dialogo .acc{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.dialogo .acc .btn.primario{width:auto;font-size:14px;padding:8px 18px}
+.giro{width:34px;height:34px;border-radius:50%;border:4px solid var(--acento-suave);border-top-color:var(--acento);animation:g 0.9s linear infinite;margin:0 auto 12px}
+@keyframes g{to{transform:rotate(360deg)}}
+.centro{text-align:center}
+@media (max-width:1100px){.dos{grid-template-columns:1fr}.panel-der{position:static;max-height:none;overflow:visible}}
+@media (max-width:760px){
+  nav{display:none} footer{padding-left:16px} main{padding:12px 16px}
+  .fila,.fila.mitad{grid-template-columns:1fr} .deslizadores{grid-template-columns:1fr 70px} .deslizadores span.et2{grid-column:1/-1}
+  header{padding:10px 16px} header .pastilla,header .sub{display:none} .paquete{grid-template-columns:44px minmax(0,1fr)} .paquete .acc{grid-column:1/-1}
+  .barra-pag input{width:100%}
+}
+.demo-banda{flex:none;background:#FFFAEB;color:#B54708;border-bottom:1px solid #FEDF89;padding:8px 22px;font-size:13px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.demo-banda a{color:inherit;font-weight:600}
+#btnSalir{display:none}
+</style>
+</head>
+<body>
+<div class="demo-banda"><span>⚠ <b>Demostración:</b> datos de ejemplo, no se crea ningún paquete. Prueba arrastrar un archivo .msi, .exe o .ps1, o haz clic en la zona punteada.</span><a href="./">← Volver</a><a href="./#descargar">Descargar la Fábrica</a></div>
+<header>
+  <div class="logo"><img id="imgCabecera" alt=""></div>
+  <div><h1>Fábrica de Paquetes</h1><div class="sub">PSAppDeployToolkit → Intune · versión web</div></div>
+  <div class="der">
+    <span class="pastilla" id="txtVersionPsadt">PSADT: cargando…</span>
+    <button class="btn-cab" id="btnTema" title="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    <button class="btn-cab" id="btnSalir" title="Detener la Fábrica web y cerrar la consola">⏻ Cerrar Fábrica</button>
+  </div>
+</header>
+<div class="cuerpo">
+  <nav>
+    <button class="item activo" data-pag="crear">📦 Crear paquete</button>
+    <button class="item" data-pag="paquetes">🗂 Paquetes creados</button>
+    <button class="item" data-pag="plantilla">🎨 Plantilla corporativa</button>
+    <button class="item" data-pag="ayuda">❓ Cómo funciona</button>
+    <hr>
+    <div class="titulo-nav">TU AVANCE</div>
+    <div class="paso" id="paso1">○ 1. Instalador</div>
+    <div class="paso" id="paso2">○ 2. Información de la app</div>
+    <div class="paso" id="paso3">○ 3. Cómo se instala</div>
+    <div class="paso" id="paso4">○ 4. Ventanas del usuario</div>
+    <div class="atajos">Atajos:
+Ctrl+O  elegir instalador
+Ctrl+Enter  crear paquete</div>
+  </nav>
+  <main>
+    <!-- ===================== Crear paquete ===================== -->
+    <section class="pagina activa" id="pag-crear">
+      <div class="dos">
+        <div>
+          <div class="tarjeta">
+            <h2>1 · Instalador</h2>
+            <p class="subt">Arrastra aquí el instalador o haz clic para buscarlo en el equipo. Se leen solos el nombre, el fabricante y la versión.</p>
+            <div class="zona" id="zona" tabindex="0">
+              <div class="ico" id="zonaIco">⬇</div>
+              <div class="t1" id="zonaT1">Arrastra aquí el .msi, .exe o .ps1</div>
+              <div class="t2" id="zonaT2">o haz clic para buscarlo</div>
+            </div>
+            <label class="et" for="txtRuta">O pega la ruta completa del instalador</label>
+            <div class="con-boton">
+              <input type="text" id="txtRuta" placeholder="D:\Fuentes\MiApp\setup.msi">
+              <button class="btn" id="btnUsarRuta">Leer</button>
+            </div>
+            <div class="ayuda">Usa la ruta (o «clic para buscar») si el instalador trae archivos adicionales o es un .ps1 con su script de desinstalación: al arrastrar solo se copia ese archivo.</div>
+            <div style="margin-top:10px"><span class="chip oculto" id="chipTipo"></span> <span class="ayuda" id="txtTipoDetalle"></span></div>
+            <label class="chk" id="lblCarpeta"><input type="checkbox" id="chkCarpeta"> Copiar toda la carpeta del instalador (si trae archivos adicionales)</label>
+          </div>
+
+          <div class="tarjeta">
+            <h2>2 · Información de la app</h2>
+            <p class="subt">Así aparece la aplicación en Intune y en Company Portal.</p>
+            <div class="fila">
+              <div><label class="et" for="txtNombre">Nombre de la aplicación</label><input type="text" id="txtNombre"><div class="msg" id="msgNombre"></div></div>
+              <div><label class="et" for="txtVersion">Versión</label><input type="text" id="txtVersion"><div class="msg" id="msgVersion"></div></div>
+            </div>
+            <div class="fila">
+              <div><label class="et" for="txtFabricante">Fabricante (publicador)</label><input type="text" id="txtFabricante"></div>
+              <div><label class="et" for="cmbArq">Arquitectura</label><select id="cmbArq"><option>x64</option><option>x86</option></select></div>
+            </div>
+            <label class="et" for="txtDescripcion">Descripción para Company Portal</label>
+            <textarea id="txtDescripcion" rows="3"></textarea>
+            <div class="ayuda">Qué hace la aplicación y para quién es. Intune la exige; si la dejas vacía se escribe una automática.</div>
+            <label class="et">Logo de la app</label>
+            <div style="display:flex;gap:14px;align-items:center">
+              <div class="logo-caja" id="logoAppCaja"><span id="logoAppIni">AP</span></div>
+              <div style="flex:1">
+                <div class="ayuda" id="txtLogoAppInfo" style="margin:0 0 6px">Sin logo: se generan las iniciales con el color de la empresa.</div>
+                <button class="btn" id="btnLogoApp">Elegir imagen…</button>
+                <button class="btn" id="btnQuitarLogoApp">Quitar</button>
+                <label class="chk" id="lblLogoVentanas"><input type="checkbox" id="chkLogoVentanas"> Mostrar este logo en las ventanas (en vez del logo de la empresa)</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="tarjeta">
+            <h2>3 · Cómo se instala</h2>
+            <p class="subt" id="txtSubInstalacion">Primero elige un instalador.</p>
+            <div id="filaArgs" class="oculto">
+              <label class="et" for="txtArgs" id="lblArgs">Argumentos de instalación</label>
+              <input type="text" id="txtArgs"><div class="msg" id="msgArgs"></div>
+              <div class="ayuda" id="lblAyudaArgs"></div>
+            </div>
+            <div id="filaDes" class="oculto">
+              <label class="et" for="txtDes" id="lblDes">Desinstalador</label>
+              <div class="con-boton"><input type="text" id="txtDes"><button class="btn" id="btnDes">Buscar…</button></div>
+              <div class="msg" id="msgDes"></div>
+              <div class="ayuda" id="lblAyudaDes"></div>
+            </div>
+            <div id="filaArgsDes" class="oculto">
+              <label class="et" for="txtArgsDes">Argumentos de desinstalación</label>
+              <input type="text" id="txtArgsDes">
+            </div>
+            <div id="filaDet" class="oculto">
+              <label class="et" for="txtDeteccion">Nombre para la detección</label>
+              <input type="text" id="txtDeteccion">
+              <div class="ayuda">Como aparece en Configuración → Aplicaciones (Programas y características).</div>
+            </div>
+          </div>
+
+          <div class="tarjeta">
+            <h2>4 · Ventanas que ve el usuario</h2>
+            <p class="subt">Mira cómo cambia la vista previa mientras ajustas.</p>
+            <label class="et" for="txtProcesos">Aplicaciones que se deben cerrar</label>
+            <input type="text" id="txtProcesos">
+            <div class="ayuda">Separadas por coma, sin .exe. Puedes darles nombre visible: excel=Microsoft Excel, AppCaja=Aplicativo Caja</div>
+            <label class="chk"><input type="checkbox" id="chkSiempre"> Mostrar las ventanas aunque la app esté cerrada (si no, se instala en silencio)</label>
+            <div class="deslizadores">
+              <span class="et2">Veces que puede aplazar</span><input type="range" id="sldAplazar" min="0" max="10" value="3"><b id="lblAplazar"></b>
+              <span class="et2">Fecha límite para aplazar</span><input type="range" id="sldDias" min="0" max="30" value="0"><b id="lblDias"></b>
+              <span class="et2">Cuenta regresiva</span><input type="range" id="sldCuenta" min="0" max="60" value="0"><b id="lblCuenta"></b>
+            </div>
+            <div class="ayuda">Cuenta regresiva: al llegar a cero se cierran las apps y se instala solo.</div>
+            <label class="et" for="txtBienvenida">Texto de la ventana (opcional)</label>
+            <textarea id="txtBienvenida" rows="2"></textarea>
+            <div class="ayuda">Si escribes algo, REEMPLAZA el texto estándar de PSADT. Formato: [bold]negrita[/bold]  [italic]cursiva[/italic]  [accent]color[/accent]  [url]https://…[/url]</div>
+            <div class="fila mitad">
+              <div><label class="et" for="txtBotonInstalar">Texto del botón Instalar</label><input type="text" id="txtBotonInstalar"></div>
+              <div><label class="et" for="txtBotonAplazar">Texto del botón Aplazar</label><input type="text" id="txtBotonAplazar"></div>
+            </div>
+            <div class="ayuda">Vacío = texto estándar de PSADT. Usa textos cortos: el botón es angosto.</div>
+            <label class="et" for="txtMensaje">Mensaje al terminar (opcional)</label>
+            <input type="text" id="txtMensaje">
+          </div>
+        </div>
+
+        <div class="panel-der">
+          <div style="font-size:15px;font-weight:600">Así lo verá el usuario</div>
+          <div class="ayuda" style="margin-bottom:10px">Vista aproximada. Para ver las ventanas reales de PSADT usa «Ver ventanas reales» (no instala nada).</div>
+          <div class="maqueta">
+            <div class="franja"></div>
+            <div class="dentro">
+              <div class="cab">
+                <div class="ini" id="mockIni">AP</div>
+                <div style="min-width:0"><div class="tit" id="mockTitulo">Nombre de la app 1.0</div><div class="st" id="mockSub">Empresa - Instalación de la aplicación</div></div>
+              </div>
+              <div class="caja">
+                <div id="mockTexto"></div>
+                <div class="lista" id="mockLista"></div>
+              </div>
+              <div id="mockFilas"></div>
+              <div class="botones" id="mockBotones"><div class="bi" id="mockBtnInstalar">Instalar</div><div class="ba" id="mockBtnAplazar">Aplazar</div></div>
+            </div>
+          </div>
+          <div class="nota naranja" id="txtAvisoSilencio"></div>
+
+          <div class="caja-destino">
+            <div style="font-weight:600;color:var(--texto2)">📁 Dónde queda el paquete listo</div>
+            <div class="ruta" id="txtDestino"></div>
+            <button class="btn" id="btnDestino">Cambiar carpeta…</button>
+            <button class="btn" id="btnDestinoDefecto">Usar la de la Fábrica</button>
+            <label class="chk"><input type="checkbox" id="chkCopiarFuente"> Incluir también la carpeta fuente (para editarlo después)</label>
+          </div>
+          <label class="chk" style="margin:0 0 10px"><input type="checkbox" id="chkIntunewin" checked> Generar también el archivo .intunewin</label>
+          <div class="nota gris" id="txtResumen" style="margin:0 0 10px">Arrastra un instalador para empezar.</div>
+          <button class="btn primario" id="btnCrear">Crear paquete</button>
+          <div class="dos-botones">
+            <button class="btn" id="btnVista">👁 Ver ventanas reales</button>
+            <button class="btn" id="btnAbrir" disabled>📂 Abrir salida</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Paquetes creados ===================== -->
+    <section class="pagina" id="pag-paquetes">
+      <div class="barra-pag">
+        <div><h2>Paquetes creados</h2><div class="ayuda" id="txtPaquetesResumen">Del más reciente al más antiguo.</div></div>
+        <div class="espacio"></div>
+        <input type="text" id="txtBuscarPaquete" placeholder="Buscar por nombre, versión o fabricante">
+        <button class="btn" id="btnRefrescarPaquetes">⟳ Actualizar</button>
+      </div>
+      <div id="listaPaquetes"></div>
+    </section>
+
+    <!-- ===================== Plantilla corporativa ===================== -->
+    <section class="pagina" id="pag-plantilla">
+      <div class="dos">
+        <div>
+          <div class="tarjeta">
+            <h2>Identidad de la empresa</h2>
+            <p class="subt">Se aplica a todos los paquetes que crees DESPUÉS de guardar.</p>
+            <label class="et" for="txtEmpresa">Nombre de la empresa</label>
+            <input type="text" id="txtEmpresa">
+            <div class="ayuda">Sale en el subtítulo de las ventanas y en el banner.</div>
+            <label class="et" for="txtColor">Color corporativo</label>
+            <div class="colores">
+              <input type="color" id="selColor" title="Elegir color">
+              <input type="text" id="txtColor">
+              <span id="paleta" class="colores"></span>
+            </div>
+            <div class="msg" id="msgColor"></div>
+            <label class="et">Logo de la empresa</label>
+            <div style="display:flex;gap:14px;align-items:center">
+              <div class="logo-caja" id="logoEmpCaja"></div>
+              <div>
+                <div class="ayuda" id="txtLogoEmpInfo" style="margin:0 0 6px"></div>
+                <button class="btn" id="btnLogo">Elegir imagen…</button>
+                <button class="btn" id="btnQuitarLogo">Usar iniciales</button>
+              </div>
+            </div>
+            <div class="ayuda">Ideal: PNG cuadrado con fondo transparente, 256 px o más. También puedes arrastrar la imagen sobre el cuadro.</div>
+            <label class="et">Banner (solo se ve con el estilo Classic)</label>
+            <div class="banner-caja" id="bannerEmpCaja"></div>
+            <div class="ayuda" id="txtBannerEmpInfo" style="margin:6px 0"></div>
+            <button class="btn" id="btnBanner">Subir banner…</button>
+            <button class="btn" id="btnQuitarBanner">Generar automático</button>
+            <div class="ayuda">Recomendado: PNG de 900 × 125 px (proporción 7,2 a 1). Con otra proporción se centra sin deformarse.</div>
+          </div>
+          <div class="tarjeta">
+            <h2>Ventanas</h2>
+            <div class="fila mitad">
+              <div><label class="et" for="cmbEstilo">Estilo</label><select id="cmbEstilo"><option value="Fluent">Fluent</option><option value="Classic">Classic</option></select><div class="ayuda">Fluent = moderno (recomendado).</div></div>
+              <div><label class="et" for="cmbIdioma">Idioma</label><select id="cmbIdioma"><option value="es">Español</option><option value="en">Inglés</option><option value="auto">Automático (idioma del equipo)</option></select></div>
+            </div>
+            <label class="et" for="txtLogs">Ruta de logs en el equipo</label>
+            <input type="text" id="txtLogs">
+            <div class="ayuda">Por defecto $envWinDir\Logs\Software  (C:\Windows\Logs\Software).</div>
+          </div>
+          <div class="tarjeta">
+            <h2>Valores por defecto de cada paquete nuevo</h2>
+            <div class="deslizadores">
+              <span class="et2">Veces que puede aplazar</span><input type="range" id="sldAplazarDef" min="0" max="10"><b id="lblAplazarDef"></b>
+              <span class="et2">Fecha límite para aplazar</span><input type="range" id="sldDiasDef" min="0" max="30"><b id="lblDiasDef"></b>
+              <span class="et2">Cuenta regresiva</span><input type="range" id="sldCuentaDef" min="0" max="60"><b id="lblCuentaDef"></b>
+            </div>
+            <label class="et" for="txtBienvenidaDef">Texto de la ventana por defecto (reemplaza el estándar de PSADT)</label>
+            <textarea id="txtBienvenidaDef" rows="2"></textarea>
+            <div class="fila mitad">
+              <div><label class="et" for="txtBotonInstalarDef">Botón Instalar por defecto</label><input type="text" id="txtBotonInstalarDef"></div>
+              <div><label class="et" for="txtBotonAplazarDef">Botón Aplazar por defecto</label><input type="text" id="txtBotonAplazarDef"></div>
+            </div>
+            <label class="et" for="txtMensajeDef">Mensaje final por defecto</label>
+            <input type="text" id="txtMensajeDef">
+          </div>
+        </div>
+        <div class="panel-der">
+          <div style="font-size:15px;font-weight:600">Así quedan los recursos</div>
+          <div class="ayuda" style="margin-bottom:12px">Se regeneran al pulsar «Guardar plantilla».</div>
+          <div class="tarjeta">
+            <label class="et" style="margin-top:0">Logo de las ventanas (Fluent)</label>
+            <div class="prev-icono"><img id="imgIconoPrev" alt=""></div>
+            <label class="et" style="margin-top:14px">Banner (estilo Classic)</label>
+            <img id="imgBannerPrev" alt="" style="max-width:100%;max-height:60px">
+          </div>
+          <div class="nota naranja oculto" id="bdPendiente" style="margin:0 0 12px">Tienes cambios sin guardar. Pulsa «Guardar plantilla».</div>
+          <button class="btn primario" id="btnGuardar">Guardar plantilla</button>
+          <button class="btn ancho" id="btnAbrirRecursos" style="margin-top:8px">📂 Abrir carpeta Recursos</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Cómo funciona ===================== -->
+    <section class="pagina ayuda-pag" id="pag-ayuda" style="max-width:860px">
+      <div class="tarjeta"><h2>Crear un paquete en 4 pasos</h2>
+        <p>1. Arrastra el instalador (.msi, .exe o .ps1), haz clic para buscarlo o pega su ruta.</p>
+        <p>2. Revisa nombre, versión, fabricante y escribe la descripción para Company Portal.</p>
+        <p>3. Ajusta las ventanas (apps a cerrar, aplazamientos, cuenta regresiva) y mira la vista previa.</p>
+        <p>4. Pulsa «Crear paquete». En la carpeta de salida quedan el .intunewin, FichaIntune.txt, Deteccion.ps1, Descripcion.txt y Logo_Intune.png.</p></div>
+      <div class="tarjeta"><h2>¿Por qué a veces no salen las ventanas?</h2>
+        <p>PSADT decide solo (modo Auto):</p>
+        <p>• Si hay apps a cerrar y están ABIERTAS → muestra la ventana completa.</p>
+        <p>• Si hay apps a cerrar y están CERRADAS → instala en silencio (no molesta al usuario).</p>
+        <p>• Si no hay nadie conectado → siempre en silencio.</p>
+        <p>Para que salgan siempre, marca «Mostrar las ventanas aunque la app esté cerrada».</p></div>
+      <div class="tarjeta"><h2>Tipos de instalador</h2>
+        <p>• MSI: todo es automático. Se detecta por su código de producto.</p>
+        <p>• EXE: escribe los argumentos silenciosos (/S, /quiet…) y la ruta del desinstalador en el equipo.</p>
+        <p>• PS1: se copia toda la carpeta del script; debe terminar con «exit 0». Se detecta por una marca en el registro que crea el paquete.</p></div>
+      <div class="tarjeta"><h2>Sobre la versión web</h2>
+        <p>• Funciona solo en este equipo: el servidor escucha en 127.0.0.1 y pide un código secreto que cambia cada vez que se abre.</p>
+        <p>• La ventana negra (consola) es la Fábrica: no la cierres mientras uses la página. Para terminar pulsa «Cerrar Fábrica».</p>
+        <p>• Mientras se crea un paquete la página espera; no hace falta recargarla.</p></div>
+      <div class="tarjeta"><h2>Antes de publicar en Intune</h2>
+        <p>Prueba como SYSTEM con los comandos de FichaIntune.txt (psexec -s -i cmd). Instala, revisa que Deteccion.ps1 diga «Detectado», desinstala y vuelve a revisar. Luego publica en un grupo piloto.</p></div>
+    </section>
+  </main>
+</div>
+<footer id="pie">
+  <div class="estado" id="estado"><span class="flecha">▶</span><span id="txtEstado">Conectando con la Fábrica…</span></div>
+  <pre id="txtLog"></pre>
+</footer>
+
+<div class="capa" id="capaEspera"><div class="dialogo centro"><div class="giro"></div><h3 id="esperaTitulo">Trabajando…</h3><div class="txt" id="esperaTexto">No cierres la consola de la Fábrica.</div></div></div>
+<div class="capa" id="capaDialogo"><div class="dialogo"><h3 id="dlgTitulo"></h3><div class="txt" id="dlgTexto"></div><div class="acc" id="dlgAcciones"></div></div></div>
+
+<script>
+// ===== Modo demostración (GitHub Pages): simula la API de la Fábrica. No crea paquetes. =====
+(function () {
+  var seq = 0, registro = [];
+  function hora() { return new Date().toTimeString().slice(0, 8); }
+  function reg(m, t) { t = t || 'Info'; var p = { OK: '[OK]   ', Aviso: '[AVISO]', Error: '[ERROR]' }[t] || '[INFO] '; seq++; registro.push({ Seq: seq, Linea: hora() + ' ' + p + ' ' + m, Tipo: t, Mensaje: m }); }
+  reg('Modo demostración: los datos son de ejemplo y no se crea ningún paquete.', 'Aviso');
+  reg('PSAppDeployToolkit cargado: versión 4.1.8');
+  reg('Listo. Arrastra un instalador para empezar.', 'OK');
+  var cfg = { Empresa: 'Mi Empresa', ColorAcento: '#0F4C81', EstiloDialogo: 'Fluent', Idioma: 'es', RutaLogs: '$envWinDir\\Logs\\Software', VecesAplazar: 3, MensajeFinal: '', Logo: '', CuentaRegresivaMin: 0, DiasLimite: 5, CarpetaDestino: '', Banner: '', HuellasAssets: '', MensajeBienvenida: '', TextoBotonInstalar: '', TextoBotonAplazar: '' };
+  var paquetes = [
+    { Fecha: '2026-11-20 16:40', NombrePaquete: 'Contoso_ContosoAgent_2.1.0_x64', NombreApp: 'Contoso Agent', Version: '2.1.0', Fabricante: 'Contoso', Tipo: 'MSI', RutaPaquete: 'D:\\FabricaPaquetes\\Paquetes\\Contoso_ContosoAgent_2.1.0_x64', RutaSalida: 'D:\\FabricaPaquetes\\Salida\\Contoso_ContosoAgent_2.1.0_x64', Intunewin: 'x', Usuario: 'demo', ExisteFuente: true, ExisteSalida: true, TieneIntunewin: true }
+  ];
+  var ejemplos = {
+    msi: { Tipo: 'MSI', Fabricante: 'Contoso', Nombre: 'Contoso Agent', Version: '2.1.0', CodigoProducto: '{6F1B2C3D-4E5F-4A1B-9C2D-3E4F5A6B7C8D}', Desinstalador: '' },
+    exe: { Tipo: 'EXE', Fabricante: 'Igor Pavlov', Nombre: '7-Zip', Version: '24.09', CodigoProducto: '', Desinstalador: '' },
+    ps1: { Tipo: 'PS1', Fabricante: '', Nombre: 'ConfigurarImpresoras', Version: '1.0.0', CodigoProducto: '', Desinstalador: 'C:\\Fuentes\\ConfigurarImpresoras\\Desinstalar.ps1' }
+  };
+  function responder(o, desde) { o.registro = registro.filter(function (l) { return l.Seq > desde; }); return Promise.resolve(new Response(JSON.stringify(o), { status: 200, headers: { 'Content-Type': 'application/json' } })); }
+  function limpio(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '').replace(/[^A-Za-z0-9.\-_]/g, ''); }
+  var fetchOriginal = window.fetch.bind(window);
+  window.fetch = function (url, op) {
+    var u = new URL(url, location.href);
+    if (u.pathname.indexOf('/api/') < 0) return fetchOriginal(url, op);
+    var ruta = u.pathname.substring(u.pathname.indexOf('/api/'));
+    var j = {}; try { if (op && typeof op.body === 'string') j = JSON.parse(op.body); } catch (e) { }
+    var desde = ruta === '/api/estado' ? 0 : seq;
+    var no = function (m) { reg(m, 'Aviso'); return responder({ ok: false, error: m }, desde); };
+    switch (ruta) {
+      case '/api/estado': return responder({ ok: true, versionPsadt: '4.1.8 (demo)', versionFabrica: '4.0', cfg: cfg, salidaPorDefecto: 'D:\\FabricaPaquetes\\Salida', tieneIntuneWinAppUtil: true, errorInicio: '' }, desde);
+      case '/api/buscar':
+        if (j.clase === 'instalador') return responder({ ok: true, ruta: 'C:\\Fuentes\\7-Zip\\7z2409-x64.exe' }, desde);
+        if (j.clase === 'ps1') return responder({ ok: true, ruta: 'C:\\Fuentes\\ConfigurarImpresoras\\Desinstalar.ps1' }, desde);
+        if (j.clase === 'carpeta') return responder({ ok: true, ruta: 'D:\\Paquetes\\Intune' }, desde);
+        return no('En la demostración no se pueden elegir imágenes.');
+      case '/api/subir':
+        if (u.searchParams.get('clase') !== 'instalador') return no('En la demostración no se pueden subir imágenes.');
+        return responder({ ok: true, ruta: 'C:\\Users\\demo\\AppData\\Local\\Temp\\FabricaWeb\\' + u.searchParams.get('nombre') }, desde);
+      case '/api/leer':
+        var ext = (j.ruta || '').split('.').pop().toLowerCase();
+        if (!ejemplos[ext]) return no('Solo se admiten instaladores .msi, .exe o scripts .ps1.');
+        var info = Object.assign({}, ejemplos[ext]);
+        reg('Instalador leído: ' + info.Nombre + ' ' + info.Version + ' [' + info.Tipo + ']', 'OK');
+        return responder({ ok: true, ruta: j.ruta, info: info, icono: null, subido: j.ruta.indexOf('\\Temp\\FabricaWeb\\') > 0 }, desde);
+      case '/api/crear':
+        var nombre = limpio(j.Fabricante + '_' + j.NombreApp + '_' + j.Version + '_' + j.Arquitectura);
+        var salida = (j.CarpetaDestino || 'D:\\FabricaPaquetes\\Salida') + '\\' + nombre;
+        reg('------ Iniciando creación del paquete ------');
+        reg('Paquete: ' + nombre);
+        reg('Creando estructura desde la plantilla oficial de PSADT...');
+        reg('Invoke-AppDeployToolkit.ps1 generado (instalar, desinstalar, reparar).', 'OK');
+        reg('Generados Deteccion.ps1, FichaIntune.txt, Descripcion.txt y Logo_Intune.png.', 'OK');
+        if (j.GenerarIntunewin) reg('Generado: ' + salida + '\\' + nombre + '.intunewin', 'OK');
+        reg('(Demostración: no se creó ningún archivo.)', 'Aviso');
+        paquetes.unshift({ Fecha: new Date().toISOString().slice(0, 16).replace('T', ' '), NombrePaquete: nombre, NombreApp: j.NombreApp, Version: j.Version, Fabricante: j.Fabricante, Tipo: (j.Instalador.split('.').pop() || '').toUpperCase(), RutaPaquete: 'x', RutaSalida: salida, Intunewin: 'x', Usuario: 'demo', ExisteFuente: true, ExisteSalida: true, TieneIntunewin: !!j.GenerarIntunewin });
+        return responder({ ok: true, resultado: { RutaSalida: salida, RutaPaquete: 'D:\\FabricaPaquetes\\Paquetes\\' + nombre, Intunewin: '' } }, desde);
+      case '/api/vista': return no('Las ventanas reales de PSADT solo se pueden ver con la Fábrica descargada en un equipo Windows.');
+      case '/api/abrir': return no('En la demostración no hay carpetas para abrir.');
+      case '/api/paquetes': return responder({ ok: true, paquetes: paquetes }, desde);
+      case '/api/destino': cfg.CarpetaDestino = j.ruta || ''; return responder({ ok: true }, desde);
+      case '/api/plantilla': Object.assign(cfg, j.valores || {}); if (j.logo === '') cfg.Logo = ''; if (j.banner === '') cfg.Banner = ''; reg('Plantilla guardada (solo en esta demostración).', 'OK'); return responder({ ok: true, cfg: cfg }, desde);
+      default: return no('No disponible en la demostración.');
+    }
+  };
+})();
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var TOKEN = new URLSearchParams(location.search).get('t') || '';
+  var $ = function (id) { return document.getElementById(id); };
+  var estado = {
+    listo: false, instalador: '', tipo: '', logoApp: null, destino: '', ultimaSalida: '',
+    cfg: {}, salidaPorDefecto: '', logoPendiente: null, bannerPendiente: null, version: 0, ocupado: false
+  };
+
+  // ---------------- Comunicación con la Fábrica ----------------
+  function agregarRegistro(lineas) {
+    if (!lineas || !lineas.length) return;
+    var pre = $('txtLog');
+    lineas.forEach(function (l) {
+      var s = document.createElement('span');
+      s.className = 'l-' + l.Tipo;
+      s.textContent = l.Linea + '\n';
+      pre.appendChild(s);
+    });
+    pre.scrollTop = pre.scrollHeight;
+    var ultima = lineas[lineas.length - 1];
+    var e = $('txtEstado');
+    e.textContent = ultima.Mensaje;
+    e.className = 'l-' + ultima.Tipo;
+  }
+  function api(ruta, cuerpo) {
+    var op = { method: cuerpo === undefined ? 'GET' : 'POST', headers: { 'X-Fabrica-Token': TOKEN } };
+    if (cuerpo !== undefined) { op.headers['Content-Type'] = 'application/json'; op.body = JSON.stringify(cuerpo); }
+    return fetch(ruta, op).then(function (r) {
+      return r.json().catch(function () { return { ok: false, error: 'Respuesta no válida de la Fábrica (HTTP ' + r.status + ').' }; });
+    }, function () {
+      return { ok: false, desconectado: true, error: 'No hay conexión con la Fábrica. ¿Se cerró la consola? Vuelve a abrir Crear-Paquete-Web.cmd.' };
+    }).then(function (d) {
+      agregarRegistro(d.registro);
+      if (d.desconectado) { $('txtEstado').textContent = d.error; $('txtEstado').className = 'l-Error'; }
+      return d;
+    });
+  }
+  function subirArchivo(archivo, clase) {
+    var url = '/api/subir?clase=' + encodeURIComponent(clase) + '&nombre=' + encodeURIComponent(archivo.name);
+    return fetch(url, { method: 'POST', headers: { 'X-Fabrica-Token': TOKEN, 'Content-Type': 'application/octet-stream' }, body: archivo })
+      .then(function (r) { return r.json(); }, function () { return { ok: false, error: 'No hay conexión con la Fábrica.' }; })
+      .then(function (d) { agregarRegistro(d.registro); return d; });
+  }
+  // Las imágenes por id no cambian; las de la plantilla (tipo=...) llevan un número para no usar una copia vieja.
+  function urlImagen(params) {
+    var u = '/api/imagen?t=' + encodeURIComponent(TOKEN) + '&' + params;
+    return params.indexOf('tipo=') === 0 ? u + '&v=' + (++estado.version) : u;
+  }
+
+  // ---------------- Diálogos ----------------
+  function esperar(titulo, texto) {
+    $('esperaTitulo').textContent = titulo;
+    $('esperaTexto').textContent = texto || 'No cierres la consola de la Fábrica.';
+    $('capaEspera').classList.add('visible');
+    estado.ocupado = true;
+  }
+  function finEspera() { $('capaEspera').classList.remove('visible'); estado.ocupado = false; }
+  function dialogo(titulo, texto, botones) {
+    return new Promise(function (resolver) {
+      $('dlgTitulo').textContent = titulo;
+      $('dlgTexto').textContent = texto;
+      var acc = $('dlgAcciones');
+      acc.innerHTML = '';
+      (botones || [{ t: 'Aceptar', v: true, p: true }]).forEach(function (b) {
+        var el = document.createElement('button');
+        el.className = 'btn' + (b.p ? ' primario' : '');
+        el.textContent = b.t;
+        el.onclick = function () { $('capaDialogo').classList.remove('visible'); resolver(b.v); };
+        acc.appendChild(el);
+      });
+      $('capaDialogo').classList.add('visible');
+      var principal = acc.querySelector('.primario');
+      if (principal) principal.focus();
+    });
+  }
+  function error(titulo, d) { return dialogo(titulo, (d && d.error) || 'Error desconocido.'); }
+
+  // ---------------- Navegación ----------------
+  function irA(pag) {
+    document.querySelectorAll('nav .item').forEach(function (b) { b.classList.toggle('activo', b.dataset.pag === pag); });
+    document.querySelectorAll('.pagina').forEach(function (s) { s.classList.toggle('activa', s.id === 'pag-' + pag); });
+    estado.pagina = pag;
+    if (pag === 'paquetes') cargarPaquetes();
+  }
+  document.querySelectorAll('nav .item').forEach(function (b) { b.onclick = function () { irA(b.dataset.pag); }; });
+  $('estado').onclick = function () { $('pie').classList.toggle('abierto'); };
+
+  // ---------------- Utilidades ----------------
+  function iniciales(texto) {
+    var p = String(texto || '').split(/[\s_\-.]+/).filter(function (x) { return /^[A-Za-z0-9]/.test(x); });
+    if (p.length >= 2) return (p[0][0] + p[1][0]).toUpperCase();
+    if (p.length === 1) return p[0].substring(0, 2).toUpperCase();
+    return 'AP';
+  }
+  function hexValido(h) { return /^#?[0-9A-Fa-f]{6}$/.test(String(h || '').trim()); }
+  function colorTexto(hex) {
+    var h = hex.replace('#', ''); var r = parseInt(h.substr(0, 2), 16), g = parseInt(h.substr(2, 2), 16), b = parseInt(h.substr(4, 2), 16);
+    return ((0.299 * r + 0.587 * g + 0.114 * b) / 255) > 0.6 ? '#1E1E1E' : '#FFFFFF';
+  }
+  function aplicarAcento(hex) {
+    if (!hexValido(hex)) return;
+    hex = '#' + hex.trim().replace('#', '');
+    var h = hex.replace('#', ''); var r = parseInt(h.substr(0, 2), 16), g = parseInt(h.substr(2, 2), 16), b = parseInt(h.substr(4, 2), 16);
+    var st = document.documentElement.style;
+    st.setProperty('--acento', hex);
+    st.setProperty('--acento-texto', colorTexto(hex));
+    st.setProperty('--acento-suave', 'rgba(' + r + ',' + g + ',' + b + ',.12)');
+  }
+  function listaProcesos(texto, descripcion) {
+    var partes = String(texto || '').split(/[,;]/).filter(function (x) { return x.trim(); });
+    var lista = [];
+    partes.forEach(function (parte) {
+      var nombre = parte.trim(), visible = '';
+      var m = /^\s*([^=]+?)\s*=\s*(.+?)\s*$/.exec(nombre);
+      if (m) { nombre = m[1]; visible = m[2]; }
+      nombre = nombre.replace(/\.exe$/i, '');
+      if (!nombre) return;
+      if (!visible) visible = (partes.length === 1 && descripcion) ? descripcion : nombre;
+      lista.push({ Nombre: nombre, Descripcion: visible });
+    });
+    return lista;
+  }
+  // Texto con las etiquetas de PSADT ([bold] [italic] [accent] [url]) como nodos seguros (sin HTML del usuario).
+  function textoFormateado(destino, texto) {
+    destino.textContent = '';
+    if (!texto) return;
+    var rx = /\[url=([^\]]+)\](.+?)\[\/url\]|\[url\](.+?)\[\/url\]|\[(\/?(?:bold|italic|accent))\]/g;
+    var neg = 0, cur = 0, acc = 0, pos = 0, m;
+    function agregar(t, enlace) {
+      if (!t) return;
+      var s = document.createElement('span');
+      s.textContent = t;
+      if (neg > 0) s.style.fontWeight = '700';
+      if (cur > 0) s.style.fontStyle = 'italic';
+      if (acc > 0) s.className = 'acento';
+      if (enlace) s.className = 'url';
+      destino.appendChild(s);
+    }
+    while ((m = rx.exec(texto)) !== null) {
+      if (m.index > pos) agregar(texto.substring(pos, m.index), false);
+      if (m[4]) {
+        switch (m[4]) { case 'bold': neg++; break; case '/bold': neg--; break; case 'italic': cur++; break; case '/italic': cur--; break; case 'accent': acc++; break; case '/accent': acc--; break; }
+      } else agregar(m[2] || m[3], true);
+      pos = m.index + m[0].length;
+    }
+    if (pos < texto.length) agregar(texto.substring(pos), false);
+  }
+  function txtAplazar(v) { v = +v; return v === 0 ? 'No permitir' : v === 1 ? '1 vez' : v + ' veces'; }
+  function txtDias(v) { v = +v; return v === 0 ? 'Sin límite' : v === 1 ? '1 día' : v + ' días'; }
+  function txtCuenta(v) { v = +v; return v === 0 ? 'Sin cuenta' : v + ' min'; }
+  function fechaLimite(dias) {
+    var d = new Date(Date.now() + dias * 86400000);
+    var p = function (n) { return (n < 10 ? '0' : '') + n; };
+    var h = d.getHours() % 12; if (h === 0) h = 12;
+    return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + p(h) + ':' + p(d.getMinutes()) + ' ' + (d.getHours() < 12 ? 'a. m.' : 'p. m.');
+  }
+  function val(id) { return $(id).value.trim(); }
+
+  // ---------------- Datos del formulario ----------------
+  function obtenerDatos() {
+    return {
+      Instalador: estado.instalador, Fabricante: val('txtFabricante'), NombreApp: val('txtNombre'), Version: val('txtVersion'),
+      Descripcion: val('txtDescripcion'), Arquitectura: $('cmbArq').value, ArgumentosInstalacion: val('txtArgs'),
+      DesinstaladorExe: val('txtDes'), ArgumentosDesinstalacion: val('txtArgsDes'), NombreDeteccion: val('txtDeteccion'),
+      ProcesosACerrar: val('txtProcesos'), SiemprePreguntar: $('chkSiempre').checked, VecesAplazar: +$('sldAplazar').value,
+      DiasLimite: +$('sldDias').value, CuentaRegresivaMin: +$('sldCuenta').value, MensajeBienvenida: val('txtBienvenida'),
+      TextoBotonInstalar: val('txtBotonInstalar'), TextoBotonAplazar: val('txtBotonAplazar'), MensajeFinal: val('txtMensaje'),
+      LogoApp: estado.logoApp ? estado.logoApp.ruta : '', LogoAppEnVentanas: $('chkLogoVentanas').checked,
+      CopiarCarpetaCompleta: $('chkCarpeta').checked, GenerarIntunewin: $('chkIntunewin').checked,
+      CarpetaDestino: estado.destino, IncluirFuente: $('chkCopiarFuente').checked
+    };
+  }
+  // Misma validación que Get-ProblemasDatos en PowerShell.
+  function problemas(d, tipo) {
+    var e = [], a = [];
+    if (!d.Instalador) e.push({ c: 'Instalador', t: 'Elige el instalador.' });
+    if (!d.NombreApp) e.push({ c: 'NombreApp', t: 'Escribe el nombre de la aplicación.' });
+    if (!d.Version) e.push({ c: 'Version', t: 'Escribe la versión.' });
+    if (tipo === 'EXE') {
+      if (!d.DesinstaladorExe) e.push({ c: 'DesinstaladorExe', t: 'El EXE necesita la ruta del desinstalador en el equipo.' });
+      if (!d.ArgumentosInstalacion) a.push({ c: 'ArgumentosInstalacion', t: 'Sin argumentos silenciosos: si el instalador muestra ventanas, Intune quedará esperando.' });
+    }
+    if (tipo === 'PS1' && d.DesinstaladorExe && d.Instalador) {
+      var base = d.Instalador.substring(0, d.Instalador.lastIndexOf('\\') + 1).toLowerCase();
+      if (d.DesinstaladorExe.toLowerCase().indexOf(base) !== 0) e.push({ c: 'DesinstaladorExe', t: 'El script de desinstalación debe estar en la carpeta del script de instalación.' });
+    }
+    if (!d.Descripcion) a.push({ c: 'Descripcion', t: 'Sin descripción: se escribirá una automática.' });
+    return { errores: e, avisos: a };
+  }
+  function marcarPaso(id, ok, texto) { var el = $(id); el.textContent = (ok ? '✔ ' : '○ ') + texto; el.classList.toggle('ok', !!ok); }
+  function validar() {
+    var d = obtenerDatos(), r = problemas(d, estado.tipo), hay = !!estado.instalador;
+    var mapa = { NombreApp: ['txtNombre', 'msgNombre'], Version: ['txtVersion', 'msgVersion'], DesinstaladorExe: ['txtDes', 'msgDes'], ArgumentosInstalacion: ['txtArgs', 'msgArgs'] };
+    Object.keys(mapa).forEach(function (k) { $(mapa[k][0]).classList.remove('error', 'aviso'); $(mapa[k][1]).className = 'msg'; });
+    var errores = r.errores.filter(function (x) { return x.c !== 'Instalador'; });
+    if (hay) {
+      r.avisos.map(function (x) { return [x, 'aviso']; }).concat(errores.map(function (x) { return [x, 'error']; })).forEach(function (p) {
+        var m = mapa[p[0].c]; if (!m) return;
+        $(m[0]).classList.remove('error', 'aviso'); $(m[0]).classList.add(p[1]);
+        $(m[1]).className = 'msg ' + p[1]; $(m[1]).textContent = p[0].t;
+      });
+    }
+    var tiene = function (campos) { return errores.some(function (x) { return campos.indexOf(x.c) >= 0; }); };
+    marcarPaso('paso1', hay, '1. Instalador');
+    marcarPaso('paso2', hay && !tiene(['NombreApp', 'Version']), '2. Información de la app');
+    marcarPaso('paso3', hay && !tiene(['DesinstaladorExe']), '3. Cómo se instala');
+    marcarPaso('paso4', hay, '4. Ventanas del usuario');
+    var res = $('txtResumen');
+    if (!hay) { res.className = 'nota gris'; res.textContent = 'Arrastra un instalador para empezar.'; }
+    else if (errores.length) { res.className = 'nota roja'; res.textContent = 'Antes de crear: ' + errores.map(function (x) { return x.t; }).join(' '); }
+    else if (r.avisos.length) { res.className = 'nota naranja'; res.textContent = 'Listo para crear. Ten en cuenta: ' + r.avisos.map(function (x) { return x.t; }).join(' '); }
+    else { res.className = 'nota verde'; res.textContent = '✔ Todo listo para crear el paquete.'; }
+    res.style.margin = '0 0 10px';
+    return { errores: errores, avisos: r.avisos, todos: r.errores };
+  }
+
+  // ---------------- Vista previa (maqueta) ----------------
+  function actualizarVista() {
+    if (!estado.listo) return;
+    var empresa = val('txtEmpresa') || estado.cfg.Empresa || '';
+    var nombre = val('txtNombre') || 'Nombre de la app';
+    $('mockTitulo').textContent = (nombre + ' ' + val('txtVersion')).trim();
+    $('mockSub').textContent = empresa + ' - Instalación de la aplicación';
+    var ini = $('mockIni');
+    var src = ($('chkLogoVentanas').checked && estado.logoApp) ? urlImagen('id=' + estado.logoApp.id) : (estado.urlLogoCorp || '');
+    if (src !== estado.srcMock || !src) {
+      estado.srcMock = src;
+      ini.textContent = '';
+      if (src) { var img = document.createElement('img'); img.src = src; img.alt = ''; img.onerror = function () { ini.textContent = iniciales(val('txtEmpresa') || estado.cfg.Empresa); }; ini.appendChild(img); }
+      else ini.textContent = iniciales(empresa);
+    }
+
+    var procesos = listaProcesos(val('txtProcesos'), nombre);
+    var veces = +$('sldAplazar').value, dias = +$('sldDias').value, cuenta = +$('sldCuenta').value;
+    if (val('txtBienvenida')) textoFormateado($('mockTexto'), val('txtBienvenida'));
+    else if (procesos.length) textoFormateado($('mockTexto'), 'Por favor, guarde su trabajo antes de continuar ya que las siguientes aplicaciones se cerrarán automáticamente.');
+    else textoFormateado($('mockTexto'), 'Por favor, seleccione Instalar para continuar con la instalación.');
+
+    var lista = $('mockLista'); lista.textContent = '';
+    procesos.forEach(function (p) {
+      var f = document.createElement('div'); f.className = 'proc';
+      var i = document.createElement('i'); i.textContent = String(p.Descripcion).substring(0, 1).toUpperCase();
+      var t = document.createElement('div'); var b = document.createElement('b'); b.textContent = p.Descripcion; var s = document.createElement('small'); s.textContent = p.Nombre + '.exe';
+      t.appendChild(b); t.appendChild(s); f.appendChild(i); f.appendChild(t); lista.appendChild(f);
+    });
+    lista.classList.toggle('oculto', procesos.length === 0);
+
+    var filas = $('mockFilas'); filas.textContent = '';
+    function fila(icono, texto, valor, resaltar) {
+      var f = document.createElement('div'); f.className = 'fila-m';
+      var a = document.createElement('span'); a.textContent = icono + '  ' + texto;
+      var b = document.createElement('b'); b.textContent = valor; if (resaltar) b.className = 'res';
+      f.appendChild(a); f.appendChild(b); filas.appendChild(f);
+    }
+    if (cuenta > 0 && (procesos.length > 0 || veces > 0)) fila('⏱', 'Cuenta regresiva de inicio automático', '0h ' + cuenta + 'm 0s', false);
+    if (veces > 0) fila('💬', 'Aplazamientos restantes', String(veces), false);
+    if (veces > 0 && dias > 0) fila('📅', 'Fecha límite de aplazamiento', fechaLimite(dias), true);
+
+    $('mockBtnInstalar').textContent = val('txtBotonInstalar') || (procesos.length ? 'Cerrar Aplicaciones e Instalar' : 'Instalar');
+    $('mockBtnAplazar').textContent = val('txtBotonAplazar') || 'Aplazar';
+    $('mockBtnAplazar').classList.toggle('oculto', veces === 0);
+    $('mockBotones').style.gridTemplateColumns = veces > 0 ? '1fr 1fr' : '1fr';
+
+    var aviso = $('txtAvisoSilencio');
+    if (procesos.length > 0 && !$('chkSiempre').checked) aviso.textContent = 'Esta ventana solo aparece si alguna de esas apps está ABIERTA. Si están cerradas, se instala en silencio sin molestar al usuario.';
+    else if (procesos.length === 0 && veces === 0 && cuenta === 0) aviso.textContent = 'Sin apps a cerrar ni aplazamiento: el usuario solo verá la barra de progreso.';
+    else aviso.textContent = 'Esta ventana aparece cada vez que haya un usuario conectado en el equipo.';
+    validar();
+  }
+
+  // ---------------- Tipo de instalador ----------------
+  function mostrar(id, si) { $(id).classList.toggle('oculto', !si); }
+  function aplicarModo(tipo) {
+    estado.tipo = tipo;
+    $('chipTipo').textContent = tipo; mostrar('chipTipo', !!tipo);
+    $('chkCarpeta').disabled = false; $('lblCarpeta').classList.remove('deshabilitado');
+    if (tipo === 'MSI') {
+      $('txtSubInstalacion').textContent = 'MSI: no hay que escribir nada. Se instala, desinstala y detecta con el propio MSI.';
+      mostrar('filaArgs', true); mostrar('filaDes', false); mostrar('filaArgsDes', false); mostrar('filaDet', false);
+      $('lblArgs').textContent = 'Propiedades MSI (opcional)';
+      $('lblAyudaArgs').textContent = 'Ej: SERVIDOR=srv01 LICENCIA=xyz. El modo silencioso (/qn) ya lo pone PSADT.';
+    } else if (tipo === 'EXE') {
+      $('txtSubInstalacion').textContent = 'EXE: indica cómo se instala en silencio y dónde queda su desinstalador.';
+      mostrar('filaArgs', true); mostrar('filaDes', true); mostrar('filaArgsDes', true); mostrar('filaDet', true);
+      $('lblArgs').textContent = 'Argumentos silenciosos (obligatorio)';
+      $('lblAyudaArgs').textContent = 'Ej: /S   /silent   /quiet   /VERYSILENT /NORESTART  (prueba setup.exe /? para verlos)';
+      $('lblDes').textContent = 'Desinstalador en el equipo (obligatorio)';
+      $('lblAyudaDes').textContent = 'Ruta después de instalar. Ej: $env:ProgramFiles\\MiApp\\uninstall.exe';
+      mostrar('btnDes', false);
+    } else if (tipo === 'PS1') {
+      $('txtSubInstalacion').textContent = 'Script PS1: se copia toda su carpeta. Tu script debe terminar con «exit 0» si todo salió bien.';
+      mostrar('filaArgs', true); mostrar('filaDes', true); mostrar('filaArgsDes', true); mostrar('filaDet', false);
+      $('lblArgs').textContent = 'Argumentos del script (opcional)';
+      $('lblAyudaArgs').textContent = 'Se pasan al script tal cual. Ej: -Modo Completo';
+      $('lblDes').textContent = 'Script de desinstalación (opcional)';
+      $('lblAyudaDes').textContent = 'Debe estar en la misma carpeta. Si lo dejas vacío, al desinstalar solo se quita la marca de registro.';
+      mostrar('btnDes', true);
+      $('chkCarpeta').checked = true; $('chkCarpeta').disabled = true; $('lblCarpeta').classList.add('deshabilitado');
+    } else {
+      $('txtSubInstalacion').textContent = 'Primero elige un instalador.';
+      mostrar('filaArgs', false); mostrar('filaDes', false); mostrar('filaArgsDes', false); mostrar('filaDet', false);
+    }
+  }
+  function mostrarLogoApp(logo, info) {
+    var caja = $('logoAppCaja'); caja.textContent = '';
+    if (logo && logo.ruta) {
+      estado.logoApp = logo;
+      var img = document.createElement('img'); img.src = urlImagen('id=' + logo.id); img.alt = ''; caja.appendChild(img);
+      $('txtLogoAppInfo').textContent = info || logo.ruta.split('\\').pop();
+      $('chkLogoVentanas').disabled = false; $('lblLogoVentanas').classList.remove('deshabilitado');
+    } else {
+      estado.logoApp = null;
+      var s = document.createElement('span'); s.textContent = iniciales(val('txtNombre') || 'App'); caja.appendChild(s);
+      $('txtLogoAppInfo').textContent = 'Sin logo: se generan las iniciales con el color de la empresa.';
+      $('chkLogoVentanas').checked = false; $('chkLogoVentanas').disabled = true; $('lblLogoVentanas').classList.add('deshabilitado');
+    }
+    actualizarVista();
+  }
+  function cargarInstalador(ruta, nombreMostrado) {
+    esperar('Leyendo el instalador…', ruta);
+    return api('/api/leer', { ruta: ruta }).then(function (d) {
+      finEspera();
+      if (!d.ok) { aplicarModo(''); return error('No se pudo leer el instalador', d); }
+      var info = d.info;
+      estado.instalador = d.ruta;
+      $('zonaIco').textContent = '✔';
+      $('zonaT1').textContent = nombreMostrado || d.ruta.split('\\').pop();
+      $('zonaT2').textContent = d.ruta.substring(0, d.ruta.lastIndexOf('\\')) + '   (clic para cambiar)';
+      $('txtRuta').value = d.ruta;
+      $('txtNombre').value = info.Nombre || '';
+      $('txtVersion').value = info.Version || '';
+      $('txtFabricante').value = info.Fabricante || estado.cfg.Empresa || '';
+      $('txtDeteccion').value = info.Nombre || '';
+      $('txtArgs').value = ''; $('txtDes').value = info.Desinstalador || ''; $('txtArgsDes').value = '';
+      $('chkCarpeta').checked = false;
+      aplicarModo(info.Tipo);
+      if (d.subido) { $('chkCarpeta').checked = false; $('chkCarpeta').disabled = true; $('lblCarpeta').classList.add('deshabilitado'); }
+      if (info.Tipo === 'MSI' && info.CodigoProducto) $('txtTipoDetalle').textContent = 'ProductCode ' + info.CodigoProducto;
+      else if (info.Tipo === 'PS1' && info.Desinstalador) $('txtTipoDetalle').textContent = 'Script de desinstalación detectado: ' + info.Desinstalador.split('\\').pop();
+      else $('txtTipoDetalle').textContent = d.subido ? 'Archivo copiado desde el navegador.' : '';
+      if (d.icono) mostrarLogoApp(d.icono, 'Ícono extraído del EXE. Puedes cambiarlo.'); else mostrarLogoApp(null);
+      actualizarVista();
+    });
+  }
+  function elegirInstalador() {
+    if (estado.ocupado) return;
+    esperar('Elige el instalador', 'Se abrió la ventana de Windows para buscar el archivo. Si no la ves, búscala en la barra de tareas.');
+    api('/api/buscar', { clase: 'instalador', inicial: estado.instalador }).then(function (d) {
+      finEspera();
+      if (!d.ok) return error('No se pudo abrir el buscador', d);
+      if (d.ruta) cargarInstalador(d.ruta);
+    });
+  }
+
+  // ---------------- Eventos: Crear paquete ----------------
+  var zona = $('zona');
+  zona.onclick = elegirInstalador;
+  zona.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); elegirInstalador(); } };
+  ['dragenter', 'dragover'].forEach(function (n) { zona.addEventListener(n, function (e) { e.preventDefault(); zona.classList.add('encima'); }); });
+  ['dragleave', 'drop'].forEach(function (n) { zona.addEventListener(n, function (e) { e.preventDefault(); zona.classList.remove('encima'); }); });
+  zona.addEventListener('drop', function (e) {
+    var f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!f) return;
+    if (!/\.(msi|exe|ps1)$/i.test(f.name)) { dialogo('Archivo no válido', 'Solo se admiten instaladores .msi, .exe o scripts .ps1.'); return; }
+    esperar('Copiando el instalador…', f.name + ' (' + Math.round(f.size / 1048576) + ' MB)');
+    subirArchivo(f, 'instalador').then(function (d) {
+      finEspera();
+      if (!d.ok) return error('No se pudo copiar el instalador', d);
+      return cargarInstalador(d.ruta, f.name);
+    });
+  });
+  // Evita que soltar un archivo fuera de la zona abra el archivo en el navegador.
+  window.addEventListener('dragover', function (e) { e.preventDefault(); });
+  window.addEventListener('drop', function (e) { e.preventDefault(); });
+
+  $('btnUsarRuta').onclick = function () {
+    var r = val('txtRuta').replace(/^"+|"+$/g, '');
+    if (!r) { dialogo('Falta la ruta', 'Pega la ruta completa del instalador, por ejemplo D:\\Fuentes\\MiApp\\setup.msi'); return; }
+    cargarInstalador(r);
+  };
+  $('txtRuta').onkeydown = function (e) { if (e.key === 'Enter') $('btnUsarRuta').onclick(); };
+
+  $('btnDes').onclick = function () {
+    esperar('Elige el script de desinstalación', 'Se abrió la ventana de Windows para buscar el archivo.');
+    api('/api/buscar', { clase: 'ps1', inicial: estado.instalador }).then(function (d) {
+      finEspera();
+      if (!d.ok) return error('No se pudo abrir el buscador', d);
+      if (d.ruta) { $('txtDes').value = d.ruta; validar(); }
+    });
+  };
+  $('btnLogoApp').onclick = function () {
+    esperar('Elige el logo de la app', 'Se abrió la ventana de Windows para buscar la imagen.');
+    api('/api/buscar', { clase: 'imagen' }).then(function (d) {
+      finEspera();
+      if (!d.ok) return error('No se pudo abrir la imagen', d);
+      if (d.ruta) mostrarLogoApp({ ruta: d.ruta, id: d.id }, '');
+    });
+  };
+  $('logoAppCaja').addEventListener('drop', function (e) {
+    var f = e.dataTransfer.files && e.dataTransfer.files[0]; if (!f) return;
+    subirArchivo(f, 'imagen').then(function (d) { if (!d.ok) return error('Logo de la app', d); mostrarLogoApp({ ruta: d.ruta, id: d.id }, f.name); });
+  });
+  $('btnQuitarLogoApp').onclick = function () { mostrarLogoApp(null); };
+
+  ['txtNombre', 'txtVersion', 'txtProcesos', 'txtBienvenida', 'txtBotonInstalar', 'txtBotonAplazar'].forEach(function (id) { $(id).addEventListener('input', actualizarVista); });
+  ['txtFabricante', 'txtDescripcion', 'txtArgs', 'txtDes'].forEach(function (id) { $(id).addEventListener('input', validar); });
+  $('txtNombre').addEventListener('input', function () { if (!estado.logoApp) $('logoAppCaja').textContent = iniciales(val('txtNombre') || 'App'); });
+  ['chkLogoVentanas', 'chkSiempre'].forEach(function (id) { $(id).addEventListener('change', actualizarVista); });
+  $('sldAplazar').addEventListener('input', function () { $('lblAplazar').textContent = txtAplazar(this.value); $('sldDias').disabled = (+this.value === 0); actualizarVista(); });
+  $('sldDias').addEventListener('input', function () { $('lblDias').textContent = txtDias(this.value); actualizarVista(); });
+  $('sldCuenta').addEventListener('input', function () { $('lblCuenta').textContent = txtCuenta(this.value); actualizarVista(); });
+
+  function mostrarDestino() {
+    $('txtDestino').textContent = estado.destino ? estado.destino : estado.salidaPorDefecto + '  (por defecto)';
+    $('txtDestino').title = estado.destino || estado.salidaPorDefecto;
+  }
+  $('btnDestino').onclick = function () {
+    esperar('Elige la carpeta destino', 'Se abrió la ventana de Windows para elegir la carpeta.');
+    api('/api/buscar', { clase: 'carpeta', inicial: estado.destino }).then(function (d) {
+      finEspera();
+      if (!d.ok) return error('No se pudo abrir el buscador', d);
+      if (!d.ruta) return;
+      api('/api/destino', { ruta: d.ruta }).then(function (r) { if (!r.ok) return error('Carpeta destino', r); estado.destino = d.ruta; mostrarDestino(); });
+    });
+  };
+  $('btnDestinoDefecto').onclick = function () {
+    api('/api/destino', { ruta: '' }).then(function (r) { if (!r.ok) return error('Carpeta destino', r); estado.destino = ''; mostrarDestino(); });
+  };
+
+  $('btnCrear').onclick = function () {
+    if (estado.ocupado) return;
+    if (!estado.instalador) { dialogo('Falta el instalador', 'Primero arrastra, busca o pega la ruta del instalador.'); return; }
+    var v = validar();
+    if (v.errores.length) { dialogo('Faltan datos', 'Corrige esto antes de crear el paquete (está marcado en rojo):\n\n' + v.errores.map(function (x) { return '• ' + x.t; }).join('\n')); return; }
+    esperar('Creando el paquete…', 'Puede tardar varios minutos si el instalador es grande o se genera el .intunewin.');
+    $('pie').classList.add('abierto');
+    api('/api/crear', obtenerDatos()).then(function (d) {
+      finEspera();
+      if (!d.ok) return error('No se pudo crear el paquete', d);
+      estado.ultimaSalida = d.resultado.RutaSalida;
+      $('btnAbrir').disabled = false;
+      dialogo('Listo', 'Paquete creado en:\n' + d.resultado.RutaSalida + '\n\nAhí están el .intunewin, FichaIntune.txt, Deteccion.ps1, Descripcion.txt y Logo_Intune.png.',
+        [{ t: 'Cerrar', v: false }, { t: 'Abrir la carpeta', v: true, p: true }]).then(function (abrir) { if (abrir) abrirCarpeta(estado.ultimaSalida); });
+    });
+  };
+  $('btnVista').onclick = function () {
+    if (estado.ocupado) return;
+    esperar('Preparando las ventanas reales…', 'No se instala nada. Las ventanas de PSADT aparecen en unos segundos.');
+    api('/api/vista', obtenerDatos()).then(function (d) { finEspera(); if (!d.ok) return error('No se pudo abrir la vista previa', d); });
+  };
+  function abrirCarpeta(ruta) { api('/api/abrir', { ruta: ruta }).then(function (d) { if (!d.ok) error('Abrir carpeta', d); }); }
+  $('btnAbrir').onclick = function () { if (estado.ultimaSalida) abrirCarpeta(estado.ultimaSalida); };
+
+  // ---------------- Paquetes creados ----------------
+  var paquetes = [];
+  function pintarPaquetes() {
+    var filtro = val('txtBuscarPaquete').toLowerCase(), cont = $('listaPaquetes'), n = 0;
+    cont.textContent = '';
+    paquetes.forEach(function (p) {
+      var buscar = [p.NombrePaquete, p.NombreApp, p.Version, p.Fabricante].join(' ').toLowerCase();
+      if (filtro && buscar.indexOf(filtro) < 0) return;
+      n++;
+      var t = document.createElement('div'); t.className = 'tarjeta paquete';
+      var tipo = document.createElement('div'); tipo.className = 'tipo'; tipo.textContent = p.Tipo || 'PKG';
+      var tx = document.createElement('div'); tx.style.minWidth = '0';
+      var n1 = document.createElement('div'); n1.className = 'n'; n1.textContent = p.NombreApp ? (p.NombreApp + ' ' + p.Version).trim() : p.NombrePaquete;
+      var det = [p.Fecha]; if (p.Fabricante) det.push(p.Fabricante); if (p.Usuario) det.push('por ' + p.Usuario);
+      if (p.TieneIntunewin) det.push('.intunewin listo'); else if (p.ExisteSalida) det.push('sin .intunewin');
+      if (!p.ExisteFuente) det.push('carpeta fuente borrada');
+      var n2 = document.createElement('div'); n2.className = 'd'; n2.textContent = det.join('  ·  ');
+      var n3 = document.createElement('div'); n3.className = 'c'; n3.textContent = p.NombrePaquete;
+      tx.appendChild(n1); tx.appendChild(n2); tx.appendChild(n3);
+      var acc = document.createElement('div'); acc.className = 'acc';
+      [['📂 Salida', p.RutaSalida, p.ExisteSalida], ['🛠 Fuente', p.RutaPaquete, p.ExisteFuente]].forEach(function (b) {
+        var bt = document.createElement('button'); bt.className = 'btn'; bt.textContent = b[0]; bt.title = b[1] || ''; bt.disabled = !b[2];
+        bt.onclick = function () { abrirCarpeta(b[1]); }; acc.appendChild(bt);
+      });
+      t.appendChild(tipo); t.appendChild(tx); t.appendChild(acc); cont.appendChild(t);
+    });
+    if (!paquetes.length) { var v = document.createElement('div'); v.className = 'ayuda'; v.style.margin = '20px 4px'; v.textContent = 'Todavía no hay paquetes. Crea el primero en «Crear paquete».'; cont.appendChild(v); }
+    $('txtPaquetesResumen').textContent = 'Mostrando ' + n + ' de ' + paquetes.length + ' paquetes, del más reciente al más antiguo.';
+  }
+  function cargarPaquetes() { api('/api/paquetes').then(function (d) { if (!d.ok) return; paquetes = d.paquetes || []; pintarPaquetes(); }); }
+  $('txtBuscarPaquete').addEventListener('input', pintarPaquetes);
+  $('btnRefrescarPaquetes').onclick = cargarPaquetes;
+
+  // ---------------- Plantilla corporativa ----------------
+  function marcarPendiente() { if (estado.listo) mostrar('bdPendiente', true); }
+  function ponerSrc(img, url) {
+    img.style.visibility = 'hidden';
+    img.onload = function () { img.style.visibility = 'visible'; };
+    img.onerror = function () { img.style.visibility = 'hidden'; };
+    img.src = url;
+  }
+  function imagenEn(caja, src) {
+    caja.textContent = '';
+    if (!src) return;
+    var img = document.createElement('img'); img.src = src; img.alt = ''; img.onerror = function () { caja.textContent = ''; }; caja.appendChild(img);
+  }
+  function cargarPlantilla(cfg) {
+    estado.listo = false;
+    estado.cfg = cfg;
+    $('txtEmpresa').value = cfg.Empresa || '';
+    $('txtColor').value = cfg.ColorAcento || '#2C2A29';
+    if (hexValido(cfg.ColorAcento)) $('selColor').value = cfg.ColorAcento;
+    aplicarAcento(cfg.ColorAcento || '#2C2A29');
+    $('cmbEstilo').value = cfg.EstiloDialogo === 'Classic' ? 'Classic' : 'Fluent';
+    $('cmbIdioma').value = (cfg.Idioma === 'es' || cfg.Idioma === 'en') ? cfg.Idioma : 'auto';
+    $('txtLogs').value = cfg.RutaLogs || '';
+    $('sldAplazarDef').value = Math.min(10, +cfg.VecesAplazar || 0);
+    $('sldDiasDef').value = Math.min(30, +cfg.DiasLimite || 0);
+    $('sldCuentaDef').value = Math.min(60, +cfg.CuentaRegresivaMin || 0);
+    $('lblAplazarDef').textContent = txtAplazar($('sldAplazarDef').value);
+    $('lblDiasDef').textContent = txtDias($('sldDiasDef').value);
+    $('lblCuentaDef').textContent = txtCuenta($('sldCuentaDef').value);
+    $('txtBienvenidaDef').value = cfg.MensajeBienvenida || '';
+    $('txtMensajeDef').value = cfg.MensajeFinal || '';
+    $('txtBotonInstalarDef').value = cfg.TextoBotonInstalar || '';
+    $('txtBotonAplazarDef').value = cfg.TextoBotonAplazar || '';
+    estado.logoPendiente = null; estado.bannerPendiente = null;
+    imagenEn($('logoEmpCaja'), cfg.Logo ? urlImagen('tipo=logoEmp') : '');
+    $('txtLogoEmpInfo').textContent = cfg.Logo ? 'Logo guardado: ' + cfg.Logo : 'Sin logo: se usan las iniciales de la empresa.';
+    imagenEn($('bannerEmpCaja'), urlImagen(cfg.Banner ? 'tipo=bannerEmp' : 'tipo=bannerCorp'));
+    $('txtBannerEmpInfo').textContent = cfg.Banner ? 'Banner propio: ' + cfg.Banner : 'Generado automáticamente con el logo, el color y el nombre de la empresa.';
+    estado.urlLogoCorp = urlImagen('tipo=logoCorp');
+    ponerSrc($('imgIconoPrev'), estado.urlLogoCorp);
+    ponerSrc($('imgCabecera'), estado.urlLogoCorp);
+    ponerSrc($('imgBannerPrev'), urlImagen('tipo=bannerCorp'));
+    mostrar('bdPendiente', false);
+    // Valores por defecto en «Crear paquete»
+    $('sldAplazar').value = Math.min(10, +cfg.VecesAplazar || 0);
+    $('sldDias').value = Math.min(30, +cfg.DiasLimite || 0);
+    $('sldCuenta').value = Math.min(60, +cfg.CuentaRegresivaMin || 0);
+    $('lblAplazar').textContent = txtAplazar($('sldAplazar').value);
+    $('lblDias').textContent = txtDias($('sldDias').value);
+    $('lblCuenta').textContent = txtCuenta($('sldCuenta').value);
+    $('sldDias').disabled = (+$('sldAplazar').value === 0);
+    $('txtBienvenida').value = cfg.MensajeBienvenida || '';
+    $('txtBotonInstalar').value = cfg.TextoBotonInstalar || '';
+    $('txtBotonAplazar').value = cfg.TextoBotonAplazar || '';
+    $('txtMensaje').value = cfg.MensajeFinal || '';
+    estado.destino = cfg.CarpetaDestino || '';
+    mostrarDestino();
+    estado.listo = true;
+    actualizarVista();
+  }
+  ['#FDDA24', '#2C2A29', '#0F4C81', '#0078D4', '#00A651', '#E4002B', '#6941C6'].forEach(function (hex) {
+    var m = document.createElement('button'); m.className = 'muestra'; m.style.background = hex; m.title = hex;
+    m.onclick = function () { $('txtColor').value = hex; $('txtColor').dispatchEvent(new Event('input')); };
+    $('paleta').appendChild(m);
+  });
+  $('txtColor').addEventListener('input', function () {
+    var h = val('txtColor');
+    if (hexValido(h)) { h = '#' + h.replace('#', ''); $('selColor').value = h; aplicarAcento(h); $('msgColor').className = 'msg'; marcarPendiente(); actualizarVista(); }
+    else { $('msgColor').className = 'msg error'; $('msgColor').textContent = 'Usa el formato #RRGGBB (ej. #2C2A29).'; }
+  });
+  $('selColor').addEventListener('input', function () { $('txtColor').value = this.value.toUpperCase(); $('txtColor').dispatchEvent(new Event('input')); });
+  function elegirImagenPlantilla(cual) {
+    esperar(cual === 'logo' ? 'Elige el logo de la empresa' : 'Elige el banner', 'Se abrió la ventana de Windows para buscar la imagen.');
+    api('/api/buscar', { clase: cual === 'logo' ? 'imagen' : 'banner' }).then(function (d) {
+      finEspera();
+      if (!d.ok) return error('No se pudo abrir la imagen', d);
+      if (d.ruta) ponerImagenPlantilla(cual, d, d.ruta.split('\\').pop());
+    });
+  }
+  function ponerImagenPlantilla(cual, d, nombre) {
+    if (cual === 'logo') {
+      estado.logoPendiente = d.ruta;
+      imagenEn($('logoEmpCaja'), urlImagen('id=' + d.id));
+      $('txtLogoEmpInfo').textContent = nombre + ' (sin guardar)';
+    } else {
+      estado.bannerPendiente = d.ruta;
+      imagenEn($('bannerEmpCaja'), urlImagen('id=' + d.id));
+      var txt = nombre + (d.ancho ? ' (' + d.ancho + ' x ' + d.alto + ' px)' : '') + ' - sin guardar';
+      if (d.ancho && Math.abs(d.ancho / d.alto - 7.2) / 7.2 > 0.15) txt += '. Proporción distinta a 7,2:1: se centrará sobre fondo blanco.';
+      $('txtBannerEmpInfo').textContent = txt;
+    }
+    marcarPendiente();
+  }
+  $('btnLogo').onclick = function () { elegirImagenPlantilla('logo'); };
+  $('btnBanner').onclick = function () { elegirImagenPlantilla('banner'); };
+  [['logoEmpCaja', 'logo'], ['bannerEmpCaja', 'banner']].forEach(function (par) {
+    $(par[0]).addEventListener('drop', function (e) {
+      var f = e.dataTransfer.files && e.dataTransfer.files[0]; if (!f) return;
+      subirArchivo(f, 'imagen').then(function (d) { if (!d.ok) return error('Imagen', d); ponerImagenPlantilla(par[1], d, f.name); });
+    });
+  });
+  $('btnQuitarLogo').onclick = function () { estado.logoPendiente = ''; imagenEn($('logoEmpCaja'), ''); $('txtLogoEmpInfo').textContent = 'Se usarán las iniciales (sin guardar)'; marcarPendiente(); };
+  $('btnQuitarBanner').onclick = function () { estado.bannerPendiente = ''; imagenEn($('bannerEmpCaja'), ''); $('txtBannerEmpInfo').textContent = 'Se generará automáticamente (sin guardar)'; marcarPendiente(); };
+  ['txtEmpresa', 'txtLogs', 'txtBienvenidaDef', 'txtMensajeDef', 'txtBotonInstalarDef', 'txtBotonAplazarDef'].forEach(function (id) { $(id).addEventListener('input', marcarPendiente); });
+  $('txtEmpresa').addEventListener('input', actualizarVista);
+  ['cmbEstilo', 'cmbIdioma'].forEach(function (id) { $(id).addEventListener('change', marcarPendiente); });
+  $('sldAplazarDef').addEventListener('input', function () { $('lblAplazarDef').textContent = txtAplazar(this.value); marcarPendiente(); });
+  $('sldDiasDef').addEventListener('input', function () { $('lblDiasDef').textContent = txtDias(this.value); marcarPendiente(); });
+  $('sldCuentaDef').addEventListener('input', function () { $('lblCuentaDef').textContent = txtCuenta(this.value); marcarPendiente(); });
+  $('btnGuardar').onclick = function () {
+    if (estado.ocupado) return;
+    var valores = {
+      Empresa: val('txtEmpresa'), ColorAcento: val('txtColor'), EstiloDialogo: $('cmbEstilo').value, Idioma: $('cmbIdioma').value,
+      RutaLogs: val('txtLogs'), VecesAplazar: +$('sldAplazarDef').value, DiasLimite: +$('sldDiasDef').value, CuentaRegresivaMin: +$('sldCuentaDef').value,
+      MensajeBienvenida: val('txtBienvenidaDef'), MensajeFinal: val('txtMensajeDef'), TextoBotonInstalar: val('txtBotonInstalarDef'), TextoBotonAplazar: val('txtBotonAplazarDef')
+    };
+    esperar('Guardando la plantilla…', 'Se regeneran el logo y el banner.');
+    api('/api/plantilla', { valores: valores, logo: estado.logoPendiente, banner: estado.bannerPendiente }).then(function (d) {
+      finEspera();
+      if (!d.ok) return error('No se pudo guardar la plantilla', d);
+      cargarPlantilla(d.cfg);
+      dialogo('Plantilla corporativa', 'Plantilla guardada.\n\nSe aplicará a los paquetes que crees desde ahora. Los paquetes que ya existían no cambian: vuelve a crearlos.');
+    });
+  };
+  $('btnAbrirRecursos').onclick = function () { abrirCarpeta('Recursos'); };
+
+  // ---------------- Cabecera ----------------
+  $('btnTema').onclick = function () {
+    var r = document.documentElement, oscuro = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    r.dataset.theme = oscuro ? 'light' : 'dark';
+    try { localStorage.setItem('fabricaTema', r.dataset.theme); } catch (e) { }
+  };
+  try { var tema = localStorage.getItem('fabricaTema'); if (tema) document.documentElement.dataset.theme = tema; } catch (e) { }
+  $('btnSalir').onclick = function () {
+    dialogo('Cerrar la Fábrica', '¿Detener la Fábrica web? Se cierra la consola y esta página deja de funcionar.', [{ t: 'Cancelar', v: false }, { t: 'Cerrar Fábrica', v: true, p: true }]).then(function (si) {
+      if (!si) return;
+      api('/api/salir', {}).then(function () {
+        document.body.innerHTML = '<div style="margin:80px auto;max-width:480px;text-align:center;font-family:Segoe UI,sans-serif"><h2>La Fábrica se cerró</h2><p>Ya puedes cerrar esta pestaña. Para volver a usarla abre <b>Crear-Paquete-Web.cmd</b>.</p></div>';
+      });
+    });
+  };
+
+  // ---------------- Atajos ----------------
+  document.addEventListener('keydown', function (e) {
+    if (!e.ctrlKey) return;
+    if (e.key === 'o' || e.key === 'O') { e.preventDefault(); irA('crear'); elegirInstalador(); }
+    else if (e.key === 'Enter' && estado.pagina === 'crear') { e.preventDefault(); $('btnCrear').onclick(); }
+  });
+
+  // ---------------- Inicio ----------------
+  estado.pagina = 'crear';
+  aplicarModo('');
+  mostrarLogoApp(null);
+  api('/api/estado').then(function (d) {
+    if (!d.ok) { $('txtVersionPsadt').textContent = 'Sin conexión'; return error('No se pudo conectar con la Fábrica', d); }
+    $('txtVersionPsadt').textContent = d.versionPsadt ? 'PSADT ' + d.versionPsadt : 'PSADT no cargado';
+    estado.salidaPorDefecto = d.salidaPorDefecto;
+    cargarPlantilla(d.cfg);
+    if (d.errorInicio) {
+      $('pie').classList.add('abierto');
+      ['btnCrear', 'btnVista', 'btnGuardar'].forEach(function (id) { $(id).disabled = true; });
+      error('No se pudo preparar la Fábrica', { error: d.errorInicio });
+    } else if (!d.tieneIntuneWinAppUtil) {
+      $('chkIntunewin').checked = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>

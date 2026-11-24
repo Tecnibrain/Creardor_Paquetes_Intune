@@ -1,4 +1,6 @@
-Herramientas/
+Herramientas/*
+!Herramientas/IntuneWinAppUtil.exe
+!Herramientas/Microsoft License Terms For Win32 Content Prep Tool.pdf
 Recursos/
 Paquetes/
 Salida/

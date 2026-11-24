@@ -98,6 +98,7 @@ $script:RutaEsteScript  = $PSCommandPath
 $script:VersionFabrica  = '4.0'
 $script:RegistroWeb     = $null   # en modo web: lista de líneas del registro que se envían al navegador
 $script:SecuenciaRegistro = 0
+$script:LargoPlantilla  = 0
 
 $script:ConfigPorDefecto = [ordered]@{
     Empresa       = 'Bancolombia'
@@ -561,6 +562,53 @@ function Test-ProcesosEnSesion {
     return ([System.IO.File]::ReadAllText($RutaScript) -match '(?m)^\s*AppProcessesToClose\s*=\s*@\(')
 }
 
+function Get-LargoMaximoPlantilla {
+    # Largo de la ruta relativa más larga que crea New-ADTTemplate dentro de un paquete
+    # (la mide en el módulo PSADT cargado; si no puede, usa un valor prudente).
+    if ($script:LargoPlantilla -gt 0) { return $script:LargoPlantilla }
+    $largo = 110
+    try {
+        $modulo = Get-Module -Name 'PSAppDeployToolkit' | Select-Object -First 1
+        if ($null -ne $modulo) {
+            $base = $modulo.ModuleBase.TrimEnd('\')
+            $maximo = 0
+            foreach ($f in @(Get-ChildItem -LiteralPath $base -Recurse -File -Force -ErrorAction SilentlyContinue)) {
+                $relativo = $f.FullName.Length - $base.Length
+                if ($relativo -gt $maximo) { $maximo = $relativo }
+            }
+            if ($maximo -gt 0) { $largo = [Math]::Max(70, 'PSAppDeployToolkit'.Length + $maximo) }
+        }
+    }
+    catch { }
+    $script:LargoPlantilla = $largo
+    return $largo
+}
+
+function Test-LongitudRutaPaquete {
+    # Windows PowerShell 5.1 no maneja rutas de más de 259 caracteres: se valida ANTES de crear el paquete
+    # para dar un mensaje claro en vez de «No se puede encontrar una parte de la ruta de acceso».
+    param([Parameter(Mandatory)][string]$RutaPaquete, [string]$CarpetaOrigen)
+    $limite = 259
+    $rutaBase = $RutaPaquete.TrimEnd('\')
+    $necesario = $rutaBase.Length + 1 + (Get-LargoMaximoPlantilla)
+    $causa = 'los archivos de PSADT'
+    if ($CarpetaOrigen -and (Test-Path -LiteralPath $CarpetaOrigen -PathType Container)) {
+        $base = $CarpetaOrigen.TrimEnd('\')
+        $maximo = 0
+        foreach ($f in @(Get-ChildItem -LiteralPath $base -Recurse -File -Force -ErrorAction SilentlyContinue)) {
+            $relativo = $f.FullName.Length - $base.Length
+            if ($relativo -gt $maximo) { $maximo = $relativo }
+        }
+        $conArchivos = $rutaBase.Length + '\Files'.Length + $maximo
+        if ($conArchivos -gt $necesario) { $necesario = $conArchivos; $causa = 'los archivos de la carpeta del instalador' }
+    }
+    if ($necesario -gt $limite) {
+        throw ("La ruta queda demasiado larga para Windows: {0} caracteres al copiar {1} (el máximo es 259).`n`n" +
+            "Solución: copia la carpeta de la Fábrica a una ruta corta y fuera de OneDrive, por ejemplo C:\FabricaPaquetes " +
+            "(hay que acortar al menos {2} caracteres). También ayuda un nombre de aplicación más corto.`n`nRuta del paquete: {3}") -f $necesario, $causa, ($necesario - $limite), $rutaBase
+    }
+}
+
 function Start-VistaPrevia {
     # Arma un paquete de prueba con la configuración actual y muestra las ventanas REALES de PSADT. No instala nada.
     param([Parameter(Mandatory)][hashtable]$Datos)
@@ -573,6 +621,7 @@ function Start-VistaPrevia {
         Remove-Item -LiteralPath $ruta -Recurse -Force
     }
     Write-Registro -Mensaje 'Preparando vista previa de las ventanas (no se instala nada)...'
+    Test-LongitudRutaPaquete -RutaPaquete $ruta
     New-ADTTemplate -Destination $script:Raiz -Name $nombre | Out-Null
     Copy-RecursosCorporativos -RutaPaquete $ruta
 
@@ -811,6 +860,10 @@ function Initialize-Fabrica {
     }
 
     Import-ModuloPSADT
+
+    if ($script:Raiz -match '\\OneDrive' -or $script:Raiz.Length -gt 80) {
+        Write-Registro -Mensaje "La Fábrica está en una ruta larga o dentro de OneDrive ($($script:Raiz)). Si sale «ruta demasiado larga» o archivos bloqueados, cópiala a una carpeta corta como C:\FabricaPaquetes." -Tipo Aviso
+    }
 
     if (-not (Test-Path -LiteralPath (Join-Path $script:Recursos 'Config\config.psd1'))) {
         Write-Registro -Mensaje 'Primera ejecución: creando la plantilla corporativa automáticamente...'
@@ -1311,7 +1364,10 @@ function New-FichaIntune {
             $claveIntune = $D.ClaveMarca -replace '^HKLM:\\', 'HKEY_LOCAL_MACHINE\'
             $deteccion = "Script personalizado: Deteccion.ps1`r`n  (o regla de Registro: clave $claveIntune  valor 'Version'  comparación de cadena = $($D.Version))"
         }
-        default { $deteccion = "Script personalizado: Deteccion.ps1  (busca '$($D.NombreDeteccion)' versión >= $($D.Version))" }
+        default {
+            if ([string]::IsNullOrWhiteSpace($D.Version)) { $deteccion = "Script personalizado: Deteccion.ps1  (busca '$($D.NombreDeteccion)' en cualquier versión)" }
+            else { $deteccion = "Script personalizado: Deteccion.ps1  (busca '$($D.NombreDeteccion)' versión >= $($D.Version))" }
+        }
     }
 
     if ($CodigoAplazamiento) { $lineaAplazamiento = "  $CodigoAplazamiento  -> Reintentar   (el usuario aplazó la instalación)" }
@@ -1400,9 +1456,18 @@ function New-PaqueteCorporativo {
     if ([string]::IsNullOrWhiteSpace($D.Fabricante)) { $D.Fabricante = [string]$cfg.Empresa }
     if ([string]::IsNullOrWhiteSpace($D.NombreApp))  { $D.NombreApp  = $info.Nombre }
     if ([string]::IsNullOrWhiteSpace($D.Version))    { $D.Version    = $info.Version }
+    if ([string]::IsNullOrWhiteSpace($D.Version) -and $D.Tipo -eq 'PS1') {
+        # La marca de detección del PS1 la crea el propio paquete: cualquier versión sirve.
+        $D.Version = '1.0.0'
+        Write-Registro -Mensaje 'Sin versión: se usa 1.0.0 para la marca de detección del script.' -Tipo Aviso
+    }
+    elseif ([string]::IsNullOrWhiteSpace($D.Version)) {
+        $D.Version = ''
+        Write-Registro -Mensaje 'Sin versión: la detección buscará la aplicación solo por su nombre, sin comparar versión.' -Tipo Aviso
+    }
     if ([string]::IsNullOrWhiteSpace($D.NombreDeteccion)) { $D.NombreDeteccion = $D.NombreApp }
     if ([string]::IsNullOrWhiteSpace($D.Descripcion)) {
-        $D.Descripcion = "Instala $($D.NombreApp) $($D.Version) de $($D.Fabricante)."
+        $D.Descripcion = (("Instala $($D.NombreApp) $($D.Version)").Trim() + " de $($D.Fabricante).")
     }
     if ($D.Tipo -eq 'PS1') { $D.CopiarCarpetaCompleta = $true }
     if ($D.Tipo -eq 'EXE' -and [string]::IsNullOrWhiteSpace($D.LogoApp)) {
@@ -1431,7 +1496,6 @@ function New-PaqueteCorporativo {
     # 2. Validaciones
     $faltantes = @()
     if ([string]::IsNullOrWhiteSpace($D.NombreApp)) { $faltantes += 'Nombre de la aplicación' }
-    if ([string]::IsNullOrWhiteSpace($D.Version))   { $faltantes += 'Versión' }
     if ($D.Tipo -eq 'EXE' -and [string]::IsNullOrWhiteSpace($D.DesinstaladorExe)) { $faltantes += 'Desinstalador (obligatorio para EXE)' }
     if ($faltantes.Count -gt 0) { throw ('Faltan datos: ' + ($faltantes -join ', ')) }
     if ($D.Tipo -eq 'EXE' -and [string]::IsNullOrWhiteSpace($D.ArgumentosInstalacion)) {
@@ -1441,7 +1505,7 @@ function New-PaqueteCorporativo {
         Write-Registro -Mensaje 'PS1 sin script de desinstalación: al desinstalar solo se quitará la marca de registro.' -Tipo Aviso
     }
 
-    $D.NombrePaquete = Get-NombreLimpio ('{0}_{1}_{2}_{3}' -f $D.Fabricante, $D.NombreApp, $D.Version, $D.Arquitectura)
+    $D.NombrePaquete = Get-NombreLimpio ((@($D.Fabricante, $D.NombreApp, $D.Version, $D.Arquitectura) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join '_')
     $D.RutaPaquete   = Join-Path $script:CarpetaPaquetes $D.NombrePaquete
     $baseSalida = $script:CarpetaSalida
     if (-not [string]::IsNullOrWhiteSpace($D.CarpetaDestino)) {
@@ -1475,6 +1539,8 @@ function New-PaqueteCorporativo {
         if ($null -eq $tamano) { $tamano = 0 }
         Write-Registro -Mensaje ('Se copiará la carpeta completa del instalador ({0:N0} MB).' -f ($tamano / 1MB))
     }
+    if ($D.CopiarCarpetaCompleta) { Test-LongitudRutaPaquete -RutaPaquete $D.RutaPaquete -CarpetaOrigen $carpetaOrigen }
+    else { Test-LongitudRutaPaquete -RutaPaquete $D.RutaPaquete }
     Write-Registro -Mensaje "Paquete: $($D.NombrePaquete)  (tipo $($D.Tipo))"
 
     try {
@@ -1774,7 +1840,10 @@ function Get-ProblemasDatos {
     $errores = @(); $avisos = @()
     if ([string]::IsNullOrWhiteSpace($Datos.Instalador)) { $errores += @{ Campo = 'Instalador'; Texto = 'Elige el instalador.' } }
     if ([string]::IsNullOrWhiteSpace($Datos.NombreApp)) { $errores += @{ Campo = 'NombreApp'; Texto = 'Escribe el nombre de la aplicación.' } }
-    if ([string]::IsNullOrWhiteSpace($Datos.Version)) { $errores += @{ Campo = 'Version'; Texto = 'Escribe la versión.' } }
+    if ([string]::IsNullOrWhiteSpace($Datos.Version)) {
+        if ($Tipo -eq 'PS1') { $avisos += @{ Campo = 'Version'; Texto = 'Sin versión: se usará 1.0.0 para la marca de detección.' } }
+        else { $avisos += @{ Campo = 'Version'; Texto = 'Sin versión: la detección buscará la app solo por su nombre.' } }
+    }
     if ($Tipo -eq 'EXE') {
         if ([string]::IsNullOrWhiteSpace($Datos.DesinstaladorExe)) { $errores += @{ Campo = 'DesinstaladorExe'; Texto = 'El EXE necesita la ruta del desinstalador en el equipo.' } }
         if ([string]::IsNullOrWhiteSpace($Datos.ArgumentosInstalacion)) { $avisos += @{ Campo = 'ArgumentosInstalacion'; Texto = 'Sin argumentos silenciosos: si el instalador muestra ventanas, Intune quedará esperando.' } }
@@ -4174,7 +4243,7 @@ Ctrl+Enter  crear paquete</div>
     var e = [], a = [];
     if (!d.Instalador) e.push({ c: 'Instalador', t: 'Elige el instalador.' });
     if (!d.NombreApp) e.push({ c: 'NombreApp', t: 'Escribe el nombre de la aplicación.' });
-    if (!d.Version) e.push({ c: 'Version', t: 'Escribe la versión.' });
+    if (!d.Version) a.push({ c: 'Version', t: tipo === 'PS1' ? 'Sin versión: se usará 1.0.0 para la marca de detección.' : 'Sin versión: la detección buscará la app solo por su nombre.' });
     if (tipo === 'EXE') {
       if (!d.DesinstaladorExe) e.push({ c: 'DesinstaladorExe', t: 'El EXE necesita la ruta del desinstalador en el equipo.' });
       if (!d.ArgumentosInstalacion) a.push({ c: 'ArgumentosInstalacion', t: 'Sin argumentos silenciosos: si el instalador muestra ventanas, Intune quedará esperando.' });

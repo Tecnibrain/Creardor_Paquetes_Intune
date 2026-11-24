@@ -712,7 +712,7 @@ Ctrl+Enter  crear paquete</div>
     var e = [], a = [];
     if (!d.Instalador) e.push({ c: 'Instalador', t: 'Elige el instalador.' });
     if (!d.NombreApp) e.push({ c: 'NombreApp', t: 'Escribe el nombre de la aplicación.' });
-    if (!d.Version) e.push({ c: 'Version', t: 'Escribe la versión.' });
+    if (!d.Version) a.push({ c: 'Version', t: tipo === 'PS1' ? 'Sin versión: se usará 1.0.0 para la marca de detección.' : 'Sin versión: la detección buscará la app solo por su nombre.' });
     if (tipo === 'EXE') {
       if (!d.DesinstaladorExe) e.push({ c: 'DesinstaladorExe', t: 'El EXE necesita la ruta del desinstalador en el equipo.' });
       if (!d.ArgumentosInstalacion) a.push({ c: 'ArgumentosInstalacion', t: 'Sin argumentos silenciosos: si el instalador muestra ventanas, Intune quedará esperando.' });

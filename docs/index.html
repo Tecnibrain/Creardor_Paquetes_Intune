@@ -43,6 +43,11 @@ header.top nav a:hover{color:var(--acento)}
 .btn.primario{background:var(--acento);color:var(--acento-texto);border-color:transparent}
 .btn.primario:hover{filter:brightness(1.08)}
 .nota{background:var(--aviso-fondo);color:var(--aviso);border-radius:10px;padding:10px 14px;font-size:14px;margin-top:22px;max-width:680px}
+.incluye{color:var(--texto3);font-size:14px;margin:14px 0 0;max-width:680px}
+.pestanas{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.pestanas button{font:inherit;font-size:14px;padding:7px 14px;border-radius:20px;border:1px solid var(--borde);background:var(--tarjeta);color:var(--texto2);cursor:pointer}
+.pestanas button[aria-selected="true"]{background:var(--acento);color:var(--acento-texto);border-color:transparent}
+.pie-captura{color:var(--texto3);font-size:14px;margin:-36px 0 40px}
 .captura{margin:8px 0 48px;border-radius:12px;overflow:hidden;border:1px solid var(--borde);box-shadow:0 20px 40px rgba(16,24,40,.12)}
 .captura img{display:block;width:100%;height:auto}
 section{padding:12px 0 36px}
@@ -69,7 +74,7 @@ footer{border-top:1px solid var(--borde);color:var(--texto3);font-size:13px;padd
 <body>
 <header class="top"><div class="ancho">
   <a class="marca" href="./"><i>📦</i>Fábrica de Paquetes</a>
-  <nav><a href="#como">Cómo se usa</a><a href="#genera">Qué genera</a><a href="#requisitos">Requisitos</a><a href="demo.html">Demostración</a><a href="https://github.com/Tecnibrain/Creardor_Paquetes_Intune">GitHub</a></nav>
+  <nav><a href="#interfaz">Cómo se ve</a><a href="#como">Cómo se usa</a><a href="manual.html">Manual</a><a href="#genera">Qué genera</a><a href="#requisitos">Requisitos</a><a href="https://github.com/Tecnibrain/Creardor_Paquetes_Intune">GitHub</a></nav>
 </div></header>
 
 <main class="ancho">
@@ -77,20 +82,35 @@ footer{border-top:1px solid var(--borde);color:var(--texto3);font-size:13px;padd
     <h1>Paquetes de PSADT para Intune,<br>sin escribir código</h1>
     <p class="lead">Arrastra un instalador <b>MSI</b>, <b>EXE</b> o un script <b>PS1</b>. La Fábrica arma el paquete de PSAppDeployToolkit 4.x, el <code>.intunewin</code>, la detección y la ficha con todo lo que hay que configurar en Intune.</p>
     <div class="botones" id="descargar">
-      <a class="btn primario" href="https://github.com/Tecnibrain/Creardor_Paquetes_Intune/archive/refs/heads/main.zip">⬇ Descargar la Fábrica (ZIP)</a>
+      <a class="btn primario" href="descargas/FabricaPaquetes_v4.0.zip" download>⬇ Descargar todo (ZIP · 1,5 MB)</a>
+      <a class="btn" href="descargas/Manual_Fabrica_de_Paquetes.pdf">📄 Manual (PDF)</a>
+      <a class="btn" href="manual.html">📖 Manual en línea</a>
       <a class="btn" href="demo.html">▶ Probar la demostración</a>
-      <a class="btn" href="https://github.com/Tecnibrain/Creardor_Paquetes_Intune">Ver el código</a>
     </div>
+    <p class="incluye">El ZIP trae la carpeta <code>FabricaPaquetes</code> lista para usar: la herramienta, los dos accesos (<code>.cmd</code>), <code>IntuneWinAppUtil.exe</code> con su licencia, el <code>LEEME</code> y el manual en PDF.</p>
     <div class="nota">La Fábrica <b>se ejecuta en tu equipo con Windows</b>. Esta página solo sirve para descargarla y conocerla: la demostración usa datos de ejemplo y no crea paquetes.</div>
   </div>
 
-  <div class="captura"><img src="img/vista-web.png" alt="Pantalla de la Fábrica de Paquetes: tarjetas para el instalador y la información de la app, y a la derecha la vista previa de la ventana que verá el usuario." width="1400" height="900"></div>
+  <section id="interfaz">
+    <h2>Cómo se ve</h2>
+    <p class="sub">Imágenes de la versión web. La versión de escritorio tiene las mismas secciones y botones.</p>
+    <div class="pestanas" role="tablist">
+      <button role="tab" aria-selected="true" data-img="crear">Crear paquete</button>
+      <button role="tab" aria-selected="false" data-img="validacion">Validación</button>
+      <button role="tab" aria-selected="false" data-img="ventanas">Ventanas del usuario</button>
+      <button role="tab" aria-selected="false" data-img="paquetes">Paquetes creados</button>
+      <button role="tab" aria-selected="false" data-img="plantilla">Plantilla corporativa</button>
+      <button role="tab" aria-selected="false" data-img="oscuro">Tema oscuro</button>
+    </div>
+    <figure class="captura"><img id="imgInterfaz" src="img/crear.png" alt="Pantalla Crear paquete: tarjetas del instalador y la información de la app, y a la derecha la vista previa de la ventana que verá el usuario." width="2040" height="1290"></figure>
+    <p class="pie-captura" id="txtInterfaz">Arrastras el instalador y los datos se llenan solos. A la derecha, la vista previa de la ventana que verá el usuario.</p>
+  </section>
 
   <section id="como">
     <h2>Cómo se usa</h2>
     <p class="sub">Tres pasos. No hay que instalar nada.</p>
     <div class="rejilla">
-      <div class="tarjeta paso"><b class="n">1</b><div><h3>Descarga</h3><p>Baja el ZIP y descomprímelo, por ejemplo en <code>D:\FabricaPaquetes</code>.</p></div></div>
+      <div class="tarjeta paso"><b class="n">1</b><div><h3>Descarga</h3><p>Baja el ZIP, desbloquéalo (clic derecho → Propiedades → Desbloquear) y descomprímelo, por ejemplo en <code>D:\FabricaPaquetes</code>.</p></div></div>
       <div class="tarjeta paso"><b class="n">2</b><div><h3>Abre</h3><p>Doble clic en <code>Crear-Paquete-Web.cmd</code> (en el navegador) o <code>Crear-Paquete.cmd</code> (ventana de escritorio).</p></div></div>
       <div class="tarjeta paso"><b class="n">3</b><div><h3>Crea</h3><p>Arrastra el instalador, revisa los datos, mira la vista previa y pulsa <b>Crear paquete</b>.</p></div></div>
     </div>
@@ -133,5 +153,35 @@ footer{border-top:1px solid var(--borde);color:var(--texto3);font-size:13px;padd
 <footer><div class="ancho">
   Fábrica de Paquetes v4.0 · Usa <a href="https://psappdeploytoolkit.com/">PSAppDeployToolkit</a> 4.x. <code>IntuneWinAppUtil.exe</code> es de Microsoft y está sujeto a sus términos de licencia (PDF incluido en <code>Herramientas</code>).
 </div></footer>
+<script>
+(function () {
+  var textos = {
+    crear: 'Arrastras el instalador y los datos se llenan solos. A la derecha, la vista previa de la ventana que verá el usuario.',
+    validacion: 'Lo que falta se marca en rojo y los avisos en naranja. El menú lateral muestra tu avance.',
+    ventanas: 'Apps a cerrar, aplazamientos, fecha límite, cuenta regresiva y textos propios, con vista previa en vivo.',
+    paquetes: 'Historial de todo lo creado, con buscador y botones para abrir la salida o la carpeta fuente.',
+    plantilla: 'Nombre de la empresa, color, logo, banner, idioma y valores por defecto para todos los paquetes.',
+    oscuro: 'La versión web también tiene tema oscuro.'
+  };
+  var alts = {
+    crear: 'Pantalla Crear paquete con un instalador cargado y la vista previa a la derecha.',
+    validacion: 'Campos marcados en rojo y naranja y resumen de lo que falta.',
+    ventanas: 'Tarjeta Ventanas que ve el usuario con deslizadores y textos.',
+    paquetes: 'Página Paquetes creados con la lista de paquetes.',
+    plantilla: 'Página Plantilla corporativa con nombre, color, logo y banner.',
+    oscuro: 'Pantalla Crear paquete con el tema oscuro.'
+  };
+  var botones = document.querySelectorAll('.pestanas button');
+  botones.forEach(function (b) {
+    b.addEventListener('click', function () {
+      botones.forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      var img = document.getElementById('imgInterfaz');
+      img.src = 'img/' + b.dataset.img + '.png';
+      img.alt = alts[b.dataset.img];
+      document.getElementById('txtInterfaz').textContent = textos[b.dataset.img];
+    });
+  });
+})();
+</script>
 </body>
 </html>

@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual de la Fábrica de Paquetes</title>
+<meta name="description" content="Manual de uso de la Fábrica de Paquetes PSADT para Intune, versión 4.0.">
+<style>
+:root{
+  --acento:#0F4C81; --acento-texto:#fff; --acento-suave:rgba(15,76,129,.08);
+  --fondo:#F4F6F9; --tarjeta:#fff; --borde:#E4E7EC; --texto:#101828; --texto2:#344054; --texto3:#667085;
+  --aviso:#B54708; --aviso-fondo:#FFFAEB; --ok:#027A48; --ok-fondo:#ECFDF3; --codigo:#F2F4F7;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --acento:#5B9BD5; --acento-texto:#0B1220; --acento-suave:rgba(91,155,213,.12);
+    --fondo:#0F1115; --tarjeta:#181B21; --borde:#2A2F38; --texto:#F2F4F7; --texto2:#D0D5DD; --texto3:#98A2B3;
+    --aviso:#FEC84B; --aviso-fondo:#2B2111; --ok:#6CE9A6; --ok-fondo:#0B2A1C; --codigo:#1F232A;
+  }
+}
+:root[data-theme="dark"]{
+  --acento:#5B9BD5; --acento-texto:#0B1220; --acento-suave:rgba(91,155,213,.12);
+  --fondo:#0F1115; --tarjeta:#181B21; --borde:#2A2F38; --texto:#F2F4F7; --texto2:#D0D5DD; --texto3:#98A2B3;
+  --aviso:#FEC84B; --aviso-fondo:#2B2111; --ok:#6CE9A6; --ok-fondo:#0B2A1C; --codigo:#1F232A;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--texto);font:16px/1.65 "Segoe UI",system-ui,-apple-system,sans-serif}
+a{color:var(--acento)}
+.barra{background:var(--tarjeta);border-bottom:1px solid var(--borde)}
+.barra div{max-width:880px;margin:0 auto;padding:0 16px;height:56px;display:flex;align-items:center;gap:14px;font-size:14px}
+.barra b{font-size:15px}
+.barra .der{margin-left:auto;display:flex;gap:14px}
+main{max-width:880px;margin:0 auto;padding:28px 16px 56px}
+h1{font-size:34px;line-height:1.15;margin:0 0 6px;letter-spacing:-.02em}
+.meta{color:var(--texto3);margin:0 0 26px}
+h2{font-size:24px;margin:40px 0 10px;padding-top:8px;border-top:1px solid var(--borde);letter-spacing:-.01em}
+h3{font-size:18px;margin:24px 0 6px}
+p,li{color:var(--texto2)}
+code{background:var(--codigo);border-radius:5px;padding:1px 6px;font:14px Consolas,monospace;color:var(--texto)}
+pre{background:var(--codigo);border-radius:8px;padding:12px 14px;overflow-x:auto;font:14px/1.5 Consolas,monospace;color:var(--texto)}
+.indice{background:var(--tarjeta);border:1px solid var(--borde);border-radius:12px;padding:14px 20px}
+.indice ol{margin:6px 0;columns:2;column-gap:28px}
+.indice li{margin:3px 0;break-inside:avoid}
+figure{margin:14px 0 20px}
+figure img{width:100%;height:auto;border-radius:10px;border:1px solid var(--borde);display:block}
+figcaption{font-size:13px;color:var(--texto3);margin-top:6px}
+.nota{border-radius:10px;padding:10px 14px;margin:14px 0;font-size:15px}
+.nota.aviso{background:var(--aviso-fondo);color:var(--aviso)}
+.nota.ok{background:var(--ok-fondo);color:var(--ok)}
+.nota.info{background:var(--acento-suave);color:var(--texto2)}
+.tabla{overflow-x:auto;margin:10px 0 16px}
+table{width:100%;border-collapse:collapse;background:var(--tarjeta);border:1px solid var(--borde);font-size:15px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--borde);vertical-align:top}
+th{background:var(--acento-suave)}
+.paso{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--acento);color:var(--acento-texto);font-size:13px;font-weight:700;margin-right:6px}
+@media (max-width:640px){.indice ol{columns:1}h1{font-size:28px}.barra .der{display:none}}
+@media print{
+  :root{--fondo:#fff;--tarjeta:#fff}
+  body{font-size:11pt;background:#fff}
+  .barra{display:none}
+  main{padding:0;max-width:none}
+  h2,h3{break-after:avoid}
+  h2{margin-top:28px}
+  figure,table,pre,.nota{break-inside:avoid}
+  a{color:inherit;text-decoration:none}
+}
+</style>
+</head>
+<body>
+<div class="barra"><div><b>📦 Fábrica de Paquetes</b><span class="der"><a href="./">Inicio</a><a href="demo.html">Demostración</a><a href="descargas/Manual_Fabrica_de_Paquetes.pdf">Descargar PDF</a></span></div></div>
+<main>
+<h1>Manual de la Fábrica de Paquetes</h1>
+<p class="meta">Versión 4.0 · Para crear paquetes de PSAppDeployToolkit 4.x listos para Microsoft Intune.</p>
+
+<div class="indice"><b>Contenido</b>
+<ol>
+  <li><a href="#que-es">Qué es</a></li>
+  <li><a href="#requisitos">Requisitos</a></li>
+  <li><a href="#instalar">Descargar y abrir</a></li>
+  <li><a href="#primera">La primera vez</a></li>
+  <li><a href="#crear">Crear un paquete</a></li>
+  <li><a href="#tipos">Qué llenar según el tipo</a></li>
+  <li><a href="#ventanas">Las ventanas del usuario</a></li>
+  <li><a href="#salida">Qué se genera</a></li>
+  <li><a href="#paquetes">Paquetes creados</a></li>
+  <li><a href="#plantilla">Plantilla corporativa</a></li>
+  <li><a href="#probar">Probar y publicar en Intune</a></li>
+  <li><a href="#problemas">Problemas frecuentes</a></li>
+  <li><a href="#seguridad">Seguridad</a></li>
+</ol></div>
+
+<h2 id="que-es" class="continua">1. Qué es</h2>
+<p>La Fábrica de Paquetes convierte un instalador <b>MSI</b>, <b>EXE</b> o un script <b>PS1</b> en un paquete de <b>PSAppDeployToolkit (PSADT) 4.x</b> listo para subir a Intune como aplicación Win32. No hay que escribir código: los datos del instalador se leen solos y la herramienta arma el script de despliegue, la detección, el <code>.intunewin</code> y una ficha con todo lo que hay que configurar en Intune.</p>
+<p>Tiene dos formas de uso, con las mismas funciones:</p>
+<ul>
+  <li><b>Versión web</b> (<code>Crear-Paquete-Web.cmd</code>): se abre en Edge. Es la que aparece en las imágenes de este manual.</li>
+  <li><b>Versión de escritorio</b> (<code>Crear-Paquete.cmd</code>): una ventana de Windows con las mismas secciones y botones.</li>
+</ul>
+<div class="nota info">Las dos se ejecutan <b>en tu equipo</b>. La página de GitHub solo sirve para descargar la Fábrica y ver la demostración.</div>
+
+<h2 id="requisitos">2. Requisitos</h2>
+<ul>
+  <li>Windows 10 u 11 con <b>Windows PowerShell 5.1</b> (viene con Windows).</li>
+  <li>No necesita permisos de administrador para crear paquetes.</li>
+  <li><b>PSAppDeployToolkit 4.x</b>: la Fábrica lo busca sola (ver la sección 4).</li>
+  <li><code>IntuneWinAppUtil.exe</code>: ya viene en la carpeta <code>Herramientas</code>.</li>
+  <li>Para la versión web: Microsoft Edge (o el navegador por defecto).</li>
+</ul>
+
+<h2 id="instalar">3. Descargar y abrir</h2>
+<p><span class="paso">1</span><b>Descarga</b> el ZIP desde la página de la Fábrica (botón <b>Descargar todo</b>).</p>
+<p><span class="paso">2</span><b>Desbloquea el ZIP antes de descomprimirlo:</b> clic derecho sobre el archivo → <b>Propiedades</b> → marca <b>Desbloquear</b> → <b>Aceptar</b>. Así Windows no muestra avisos de seguridad con cada archivo.</p>
+<p><span class="paso">3</span><b>Descomprime</b> en una carpeta del equipo de empaquetamiento, por ejemplo <code>D:\FabricaPaquetes</code>. Evita el Escritorio y <code>%TEMP%</code>, que suelen tener restricciones de AppLocker.</p>
+<p><span class="paso">4</span><b>Abre</b> con doble clic:</p>
+<div class="tabla"><table>
+  <tr><th>Archivo</th><th>Qué abre</th></tr>
+  <tr><td><code>Crear-Paquete-Web.cmd</code></td><td>La versión web en Edge. Se abre también una ventana negra: <b>no la cierres</b>, es la Fábrica. Para terminar, pulsa <b>Cerrar Fábrica</b> en la página.</td></tr>
+  <tr><td><code>Crear-Paquete.cmd</code></td><td>La versión de escritorio.</td></tr>
+</table></div>
+<p>La carpeta queda así:</p>
+<pre>FabricaPaquetes\
+├── Crear-Paquete.cmd       ← escritorio
+├── Crear-Paquete-Web.cmd   ← versión web
+├── Nuevo-Paquete.ps1       ← la herramienta
+├── LEEME.md
+├── Manual_Fabrica_de_Paquetes.pdf
+├── Herramientas\           ← IntuneWinAppUtil.exe (+ módulo PSADT)
+├── Recursos\               ← plantilla corporativa (se crea sola)
+├── Paquetes\               ← carpeta editable de cada paquete
+└── Salida\                 ← lo que se sube a Intune</pre>
+
+<h2 id="primera">4. La primera vez</h2>
+<p>Al abrirla por primera vez, la Fábrica:</p>
+<ol>
+  <li><b>Busca el módulo PSADT</b> en este orden: la carpeta <code>Herramientas</code>, el módulo instalado en el equipo y, por último, la PowerShell Gallery si hay Internet. Si lo descarga, queda guardado en <code>Herramientas</code>.</li>
+  <li><b>Crea la plantilla corporativa</b> en <code>Recursos</code>, con un logo y un banner generados con las iniciales de la empresa.</li>
+</ol>
+<div class="nota aviso"><b>Sin Internet:</b> en un equipo que sí tenga, ejecuta <code>Save-Module -Name PSAppDeployToolkit -Path C:\Temp\PSADT</code> y copia <code>C:\Temp\PSADT\PSAppDeployToolkit</code> dentro de <code>Herramientas</code>.</div>
+<p>Después, revisa la <a href="#plantilla">plantilla corporativa</a> (nombre de la empresa, color y logo) antes de crear el primer paquete.</p>
+
+<h2 id="crear">5. Crear un paquete</h2>
+<p>La pantalla <b>Crear paquete</b> tiene cuatro tarjetas a la izquierda y la vista previa a la derecha. En el menú lateral, <b>Tu avance</b> marca con ✔ cada paso completo.</p>
+<figure><img src="img/crear.png" alt="Pantalla Crear paquete con un instalador de 7-Zip cargado y la vista previa de la ventana a la derecha." loading="lazy"><figcaption>Pantalla «Crear paquete» con un EXE cargado.</figcaption></figure>
+
+<h3>Tarjeta 1 · Instalador</h3>
+<p>Arrastra el <code>.msi</code>, <code>.exe</code> o <code>.ps1</code> a la zona punteada, o haz clic para buscarlo. En la versión web también puedes pegar la ruta completa y pulsar <b>Leer</b>.</p>
+<div class="nota aviso"><b>Versión web:</b> al <b>arrastrar</b>, el navegador solo copia ese archivo. Si el instalador trae archivos adicionales, o es un <code>.ps1</code> con su script de desinstalación, usa el clic o pega la ruta.</div>
+<p>Si el instalador necesita otros archivos de su carpeta, marca <b>Copiar toda la carpeta del instalador</b>.</p>
+
+<h3>Tarjeta 2 · Información de la app</h3>
+<p>Nombre, versión y fabricante se llenan solos; revísalos. Escribe la <b>Descripción para Company Portal</b> (si la dejas vacía se escribe una automática). El <b>logo de la app</b> se toma del ícono del EXE o puedes elegir una imagen; si marcas <b>Mostrar este logo en las ventanas</b>, aparece también en las ventanas de PSADT.</p>
+
+<h3>Tarjeta 3 · Cómo se instala</h3>
+<p>Los campos cambian según el tipo de instalador (ver la <a href="#tipos">sección 6</a>). Lo que falta se marca <b>en rojo</b> y los avisos <b>en naranja</b>; encima del botón <b>Crear paquete</b> aparece un resumen.</p>
+<figure><img src="img/validacion.png" alt="Tarjeta Cómo se instala con el desinstalador marcado en rojo y los argumentos en naranja." loading="lazy"><figcaption>Validación: falta el desinstalador del EXE (rojo) y no hay argumentos silenciosos (naranja).</figcaption></figure>
+
+<h3>Tarjeta 4 · Ventanas que ve el usuario</h3>
+<p>Configura lo que ve la persona en su equipo. La vista previa de la derecha cambia mientras ajustas. Detalles en la <a href="#ventanas">sección 7</a>.</p>
+<figure><img src="img/ventanas.png" alt="Tarjeta Ventanas que ve el usuario con aplicaciones a cerrar, aplazamientos y cuenta regresiva." loading="lazy"><figcaption>Aplicaciones a cerrar, aplazamientos, fecha límite y textos de la ventana.</figcaption></figure>
+
+<h3>Panel derecho: crear</h3>
+<ul>
+  <li><b>Dónde queda el paquete listo:</b> por defecto en <code>Salida</code>. Con <b>Cambiar carpeta…</b> puedes elegir otra, incluso una carpeta de red. Se recuerda para la próxima vez.</li>
+  <li><b>Incluir también la carpeta fuente:</b> copia la carpeta editable del paquete junto a la salida.</li>
+  <li><b>Generar también el archivo .intunewin:</b> déjalo marcado.</li>
+  <li><b>Ver ventanas reales:</b> muestra las ventanas de PSADT con tu configuración <b>sin instalar nada</b>. Si no indicaste apps a cerrar, abre el Bloc de notas para mostrar la lista.</li>
+  <li><b>Crear paquete</b> y luego <b>Abrir salida</b>.</li>
+</ul>
+<p>Atajos: <code>Ctrl+O</code> elegir instalador · <code>Ctrl+Enter</code> crear paquete · <code>F5</code> ver ventanas reales (escritorio).</p>
+
+<h2 id="tipos">6. Qué llenar según el tipo</h2>
+<div class="tabla"><table>
+  <tr><th></th><th>MSI</th><th>EXE</th><th>PS1</th></tr>
+  <tr><td>Nombre, versión, fabricante</td><td>Automático</td><td>Automático</td><td>Nombre automático; versión <code>1.0.0</code> (cámbiala)</td></tr>
+  <tr><td>Argumentos</td><td>Opcional (<code>PROPIEDAD=valor</code>). El modo silencioso lo pone PSADT.</td><td><b>Obligatorio en la práctica:</b> argumentos silenciosos (<code>/S</code>, <code>/quiet</code>, <code>/VERYSILENT</code>…)</td><td>Opcional</td></tr>
+  <tr><td>Desinstalador</td><td>No aplica</td><td><b>Obligatorio:</b> ruta en el equipo después de instalar, por ejemplo <code>$env:ProgramFiles\App\uninstall.exe</code></td><td>Opcional: tu <code>Desinstalar.ps1</code> (se detecta solo)</td></tr>
+  <tr><td>Detección en Intune</td><td>Código de producto del MSI</td><td>Nombre en Programas y características y versión</td><td>Marca de registro que crea el paquete</td></tr>
+</table></div>
+<p><b>Scripts PS1:</b> se copia toda la carpeta del script, y tu script debe terminar con <code>exit 0</code> si todo salió bien. El paquete deja la marca <code>HKLM\SOFTWARE\&lt;Empresa&gt;\Paquetes\&lt;App&gt;</code> con la versión; se borra al desinstalar.</p>
+
+<h2 id="ventanas">7. Las ventanas del usuario</h2>
+<p>PSADT decide solo si muestra ventanas (modo <b>Auto</b>):</p>
+<ul>
+  <li>Hay apps a cerrar y están <b>abiertas</b> → muestra la ventana completa.</li>
+  <li>Hay apps a cerrar y están <b>cerradas</b> → instala <b>en silencio</b>, sin molestar.</li>
+  <li>No hay nadie conectado → siempre en silencio.</li>
+</ul>
+<p>Para que salgan siempre, marca <b>Mostrar las ventanas aunque la app esté cerrada</b>.</p>
+<div class="tabla"><table>
+  <tr><th>Opción</th><th>Qué hace</th></tr>
+  <tr><td>Aplicaciones que se deben cerrar</td><td>Nombres de proceso separados por coma, sin <code>.exe</code>. Con nombre visible: <code>excel=Microsoft Excel</code>.</td></tr>
+  <tr><td>Veces que puede aplazar</td><td>0 = no permite aplazar. Muestra «Aplazamientos restantes».</td></tr>
+  <tr><td>Fecha límite para aplazar</td><td>Días desde el primer intento en los que se puede aplazar.</td></tr>
+  <tr><td>Cuenta regresiva</td><td>Minutos; al llegar a cero se cierran las apps y se instala.</td></tr>
+  <tr><td>Texto de la ventana</td><td><b>Reemplaza</b> el texto estándar de PSADT. Admite <code>[bold]</code>, <code>[italic]</code>, <code>[accent]</code> y <code>[url]</code>.</td></tr>
+  <tr><td>Texto de los botones</td><td>Cambia «Instalar» y «Aplazar». Usa textos cortos.</td></tr>
+  <tr><td>Mensaje al terminar</td><td>Aviso que aparece cuando termina la instalación.</td></tr>
+</table></div>
+
+<h2 id="salida">8. Qué se genera</h2>
+<div class="tabla"><table>
+  <tr><th>Archivo</th><th>Para qué</th></tr>
+  <tr><td><code>&lt;Paquete&gt;.intunewin</code></td><td>Se sube a Intune.</td></tr>
+  <tr><td><code>FichaIntune.txt</code></td><td>Todo lo que hay que configurar en Intune: comandos, códigos de retorno, detección, requisitos y pruebas.</td></tr>
+  <tr><td><code>Deteccion.ps1</code></td><td>Script de detección.</td></tr>
+  <tr><td><code>Descripcion.txt</code></td><td>Descripción para copiar y pegar.</td></tr>
+  <tr><td><code>Logo_Intune.png</code></td><td>Logo de la app para Company Portal (512 px).</td></tr>
+  <tr><td><code>Fuente\</code> (opcional)</td><td>Copia de la carpeta editable del paquete.</td></tr>
+</table></div>
+<p>La carpeta editable de cada paquete queda en <code>Paquetes\&lt;Fabricante_App_Versión_Arq&gt;</code>. Si necesitas ajustes que la Fábrica no hace (transformaciones <code>.mst</code>, varios instaladores, copiar licencias), edita ahí <code>Invoke-AppDeployToolkit.ps1</code>.</p>
+
+<h2 id="paquetes">9. Paquetes creados</h2>
+<p>Lista los paquetes hechos con la Fábrica, del más reciente al más antiguo: fecha, quién lo creó y si tiene <code>.intunewin</code>. Tiene buscador y botones para abrir la <b>Salida</b> o la carpeta <b>Fuente</b> de cada uno.</p>
+<figure><img src="img/paquetes.png" alt="Página Paquetes creados con dos paquetes listados." loading="lazy"><figcaption>Historial de paquetes (se guarda en Recursos\Historial.json).</figcaption></figure>
+
+<h2 id="plantilla">10. Plantilla corporativa</h2>
+<p>Se configura una vez y aplica a <b>todos los paquetes que se creen después</b> de guardar. Los paquetes que ya existían no cambian: hay que volver a crearlos.</p>
+<figure><img src="img/plantilla.png" alt="Página Plantilla corporativa con nombre de empresa, color, logo y banner." loading="lazy"><figcaption>Nombre de la empresa, color, logo, banner, estilo, idioma y valores por defecto.</figcaption></figure>
+<ul>
+  <li><b>Empresa y color:</b> salen en las ventanas y en el banner.</li>
+  <li><b>Logo:</b> PNG cuadrado con fondo transparente, 256 px o más. Es el que se ve en el estilo <b>Fluent</b>.</li>
+  <li><b>Banner:</b> solo se ve en el estilo <b>Classic</b>. Recomendado: PNG de 900 × 125 px.</li>
+  <li><b>Idioma, ruta de logs</b> y valores por defecto de aplazamientos, cuenta regresiva y textos.</li>
+  <li>Si alguien reemplaza a mano una imagen en <code>Recursos\Assets</code>, la Fábrica la detecta al guardar y <b>la conserva</b>.</li>
+</ul>
+
+<h2 id="probar">11. Probar y publicar en Intune</h2>
+<div class="nota aviso"><b>Obligatorio:</b> prueba cada paquete como SYSTEM antes de publicarlo. <code>FichaIntune.txt</code> trae los comandos exactos.</div>
+<pre>psexec -s -i cmd
+cd /d D:\FabricaPaquetes\Paquetes\&lt;Paquete&gt;
+Invoke-AppDeployToolkit.exe -DeploymentType Install
+powershell -ExecutionPolicy Bypass -File D:\FabricaPaquetes\Salida\&lt;Paquete&gt;\Deteccion.ps1
+Invoke-AppDeployToolkit.exe -DeploymentType Uninstall</pre>
+<p>La detección debe decir «Detectado» después de instalar y no detectar nada después de desinstalar.</p>
+<p><b>Publicar:</b></p>
+<ol>
+  <li>Intune → <b>Aplicaciones → Windows → Agregar → Aplicación Windows (Win32)</b> → sube el <code>.intunewin</code>.</li>
+  <li>Copia los valores de <code>FichaIntune.txt</code> y sube <code>Logo_Intune.png</code> como logo.</li>
+  <li>Asigna como <b>Disponible</b> a un grupo piloto; cuando funcione, pásala a <b>Requerido</b>.</li>
+</ol>
+
+<h2 id="problemas">12. Problemas frecuentes</h2>
+<div class="tabla"><table>
+  <tr><th>Qué pasa</th><th>Qué hacer</th></tr>
+  <tr><td>Las ventanas no aparecen al instalar.</td><td>Es normal si las apps a cerrar están cerradas (modo Auto). Marca «Mostrar las ventanas aunque la app esté cerrada» si las quieres siempre.</td></tr>
+  <tr><td>«No se pudo conseguir el módulo PSAppDeployToolkit».</td><td>El equipo no tiene Internet. Copia el módulo a <code>Herramientas</code> (sección 4).</td></tr>
+  <tr><td>No se generó el <code>.intunewin</code>.</td><td>Falta <code>Herramientas\IntuneWinAppUtil.exe</code>.</td></tr>
+  <tr><td>«Ya existe el paquete…».</td><td>Ya hay un paquete con ese nombre y versión en <code>Paquetes</code>. Bórralo o cambia la versión.</td></tr>
+  <tr><td>Versión web: al hacer clic no aparece el buscador de archivos.</td><td>Quedó detrás del navegador: búscalo en la barra de tareas.</td></tr>
+  <tr><td>Versión web: «No hay conexión con la Fábrica».</td><td>Se cerró la ventana negra. Vuelve a abrir <code>Crear-Paquete-Web.cmd</code>.</td></tr>
+  <tr><td>Cambié el logo y los paquetes siguen con el anterior.</td><td>La plantilla solo aplica a paquetes nuevos: vuelve a crear el paquete.</td></tr>
+  <tr><td>Windows bloquea los <code>.cmd</code> o el script.</td><td>Desbloquea el ZIP antes de descomprimir (sección 3) y usa una carpeta permitida por AppLocker.</td></tr>
+</table></div>
+
+<h2 id="seguridad">13. Seguridad</h2>
+<ul>
+  <li>Los <code>.cmd</code> usan <code>-ExecutionPolicy Bypass</code> solo para abrir la Fábrica en el equipo de empaquetamiento. Si la política lo exige, firma los scripts con el certificado interno.</li>
+  <li>La versión web solo escucha en <code>127.0.0.1</code> (no acepta conexiones de otros equipos) y usa un código que cambia cada vez que se abre. Desde la página solo se abren carpetas de la Fábrica y de sus paquetes.</li>
+  <li>No pongas contraseñas ni tokens en los argumentos: quedan en los logs y en la caché de Intune.</li>
+  <li>Los paquetes se ejecutan como SYSTEM: revisa el script generado antes de publicar.</li>
+  <li>Usa solo la versión oficial de PSADT (PowerShell Gallery o el GitHub de PSAppDeployToolkit).</li>
+  <li><code>IntuneWinAppUtil.exe</code> está sujeto a los términos de licencia de Microsoft (PDF en <code>Herramientas</code>).</li>
+</ul>
+</main>
+</body>
+</html>

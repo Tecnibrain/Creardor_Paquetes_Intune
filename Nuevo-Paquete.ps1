@@ -2294,7 +2294,7 @@ $script:XamlInterfaz = @'
 
               <TextBlock Style="{StaticResource Etiqueta}" Text="Texto de la ventana (opcional)"/>
               <TextBox x:Name="txtBienvenida" Height="56" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top"/>
-              <TextBlock Style="{StaticResource Ayuda}" Text="Si escribes algo, REEMPLAZA el texto estándar de PSADT. Vacío = texto estándar. Formato: [bold]negrita[/bold]  [italic]cursiva[/italic]  [accent]color[/accent]  [url]https://...[/url]"/>
+              <TextBlock Style="{StaticResource Ayuda}" Text="Si escribes algo, REEMPLAZA el texto estándar de PSADT. Vacío = texto estándar. Pulsa Enter para un salto de línea. Formato: [bold]negrita[/bold]  [italic]cursiva[/italic]  [accent]color[/accent]  [url]https://...[/url]"/>
               <Grid>
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="*"/>
@@ -3707,6 +3707,7 @@ input[type=range]{width:100%;accent-color:var(--acento)}
 .maqueta .tit{font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .maqueta .st{font-size:11px;color:#667085}
 .maqueta .caja{border:1px solid #E4E7EC;border-radius:6px;margin-top:12px;padding:10px;font-size:11.5px;color:#344054}
+#mockTexto{white-space:pre-line}
 .maqueta .lista{border:1px solid #E4E7EC;border-radius:6px;margin-top:10px;padding:4px 8px}
 .maqueta .proc{display:flex;gap:8px;align-items:center;margin:4px 0}
 .maqueta .proc i{width:22px;height:22px;border-radius:4px;background:var(--acento-suave);display:grid;place-items:center;font-style:normal;font-weight:700;font-size:11px}
@@ -3893,7 +3894,7 @@ Ctrl+Enter  crear paquete</div>
             <div class="ayuda">Cuenta regresiva: al llegar a cero se cierran las apps y se instala solo.</div>
             <label class="et" for="txtBienvenida">Texto de la ventana (opcional)</label>
             <textarea id="txtBienvenida" rows="2"></textarea>
-            <div class="ayuda">Si escribes algo, REEMPLAZA el texto estándar de PSADT. Formato: [bold]negrita[/bold]  [italic]cursiva[/italic]  [accent]color[/accent]  [url]https://…[/url]</div>
+            <div class="ayuda">Si escribes algo, REEMPLAZA el texto estándar de PSADT. Pulsa Enter para un salto de línea. Formato: [bold]negrita[/bold]  [italic]cursiva[/italic]  [accent]color[/accent]  [url]https://…[/url]</div>
             <div class="fila mitad">
               <div><label class="et" for="txtBotonInstalar">Texto del botón Instalar</label><input type="text" id="txtBotonInstalar"></div>
               <div><label class="et" for="txtBotonAplazar">Texto del botón Aplazar</label><input type="text" id="txtBotonAplazar"></div>
